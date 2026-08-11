@@ -27,509 +27,584 @@ export default function Home() {
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({
+  fullName: "",
+  email: "",
+  password: "",
+});
 
-  const handleSignup = async () => {
-    console.log("Signup started");
+ const handleSignup = async () => {
+  console.log("Signup started");
 
-    if (!fullName.trim() || !email.trim() || !password.trim()) {
-      alert("Please fill in all fields.");
-      return;
-    }
-
-    if (password.length < 8) {
-      alert("Password must be at least 8 characters.");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      console.log("Calling Supabase Auth...");
-
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password: password,
-      });
-
-      console.log("Supabase Auth response:", data);
-
-      if (error) {
-        console.error("Auth error:", error);
-        alert(error.message);
-        return;
-      }
-
-      if (!data.user) {
-        alert("Account creation failed.");
-        return;
-      }
-
-      console.log("User created:", data.user.id);
-
-      console.log("Inserting into superblockusers...");
-
-      const { error: profileError } = await supabase
-        .from("superblockusers")
-        .insert({
-          id: data.user.id,
-          full_name: fullName.trim(),
-          email: email.trim(),
-        });
-
-      if (profileError) {
-        console.error("Database insert error:", profileError);
-        alert(profileError.message);
-        return;
-      }
-
-      console.log("Database insert successful");
-
-      alert("Account created successfully!");
-
-      setFullName("");
-      setEmail("");
-      setPassword("");
-
-    } catch (error) {
-      console.error("Unexpected error:", error);
-      alert("Something went wrong. Check the browser console.");
-    } finally {
-      setLoading(false);
-    }
+  const newErrors = {
+    fullName: "",
+    email: "",
+    password: "",
   };
 
+  // Full name validation
+  if (!fullName.trim()) {
+    newErrors.fullName = "Full name is required.";
+  }
+
+  // Email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!email.trim()) {
+    newErrors.email = "Email is required.";
+  } else if (!emailRegex.test(email.trim())) {
+    newErrors.email = "Enter a valid email address.";
+  }
+
+  // Password validation
+  if (!password) {
+    newErrors.password = "Password is required.";
+  } else if (password.length < 8) {
+    newErrors.password = "Password must be at least 8 characters.";
+  }
+
+  setErrors(newErrors);
+
+  // Stop if validation failed
+  if (newErrors.fullName || newErrors.email || newErrors.password) {
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password: password,
+    });
+
+    if (error) {
+      console.error("Auth error:", error);
+      alert(error.message);
+      return;
+    }
+
+    if (!data.user) {
+      alert("Account creation failed.");
+      return;
+    }
+
+    const { error: profileError } = await supabase
+      .from("superblockusers")
+      .insert({
+        id: data.user.id,
+        full_name: fullName.trim(),
+        email: email.trim(),
+      });
+
+    if (profileError) {
+      console.error("Database insert error:", profileError);
+      alert(profileError.message);
+      return;
+    }
+
+    alert("Account created successfully!");
+
+    setFullName("");
+    setEmail("");
+    setPassword("");
+
+    setErrors({
+      fullName: "",
+      email: "",
+      password: "",
+    });
+
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    alert("Something went wrong. Check the browser console.");
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
-    <main className="flex min-h-screen w-full">
+    <main className="min-h-screen w-full bg-[#FAFAF8] text-[#0A0A0A]">
 
-      {/* =====================================================
-          LEFT SIDE
-      ===================================================== */}
+      <div className="flex min-h-screen">
 
-      <section className="flex w-1/2 flex-col px-16 py-10">
+        {/* =====================================================
+            LEFT SIDE
+        ===================================================== */}
 
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <img
-            src="/super block 1.png"
-            alt="Superblock logo"
-            className="h-8 w-8 object-contain"
-          />
+        <section className="flex w-[55%] flex-col px-[52px] py-[52px]">
 
-          <span className="text-2xl font-bold tracking-tight text-green-700">
-            Superblock
-          </span>
-        </div>
+          {/* Logo */}
+      {/* Logo */}
+<div className="flex items-center">
+  <img
+    src="/super block 1.png"
+    alt="Superblock"
+    className="h-[34px] w-[128px] object-contain"
+  />
 
-        {/* Badge */}
-        <div className="mt-10 inline-flex w-fit rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-semibold tracking-wide text-green-800">
-          FREE FOREVER · NO CREDIT CARD
-        </div>
+  <span className="ml-[-35px] text-[24px] font-semibold tracking-[-0.4px] text-[#008A43]">
+    Superblock
+  </span>
+</div>
 
-        {/* Main Heading */}
-        <h1 className="mt-8 max-w-2xl text-4xl font-bold leading-[1.1] tracking-tight text-gray-900">
-          Every channel your customers use,
-          <span className="block text-green-700">
-            in one workspace
-          </span>
-        </h1>
+          {/* Badge */}
+          <div className="mt-14 inline-flex w-fit rounded-full bg-[#E8EFEC] px-[10px] py-[5px]">
 
-        {/* Description */}
-        <p className="mt-6 max-w-xl text-base leading-7 text-gray-600">
-          WhatsApp, RCS, Instagram, Email, SMS, AI voice,
-          chatbots, automations and funnels — built for teams
-          that need to ship and scale.
-        </p>
-
-        {/* Feature heading */}
-        <p className="mt-10 text-xs font-semibold tracking-[0.15em] text-gray-500">
-          BUILT INTO YOUR WORKSPACE
-        </p>
-
-        {/* Feature Grid */}
-        <div className="mt-6 grid grid-cols-2 gap-x-10 gap-y-6">
-
-          {/* WhatsApp */}
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50">
-              <FaWhatsapp className="text-[22px] text-green-600" />
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                WhatsApp Business API
-              </h3>
-              <p className="mt-1 text-xs leading-5 text-gray-500">
-                Official Meta integration
-              </p>
-            </div>
-          </div>
-
-          {/* RCS */}
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-              <SiGooglemessages className="text-[21px] text-blue-600" />
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                RCS Business Messaging
-              </h3>
-              <p className="mt-1 text-xs leading-5 text-gray-500">
-                Verified branded chats
-              </p>
-            </div>
-          </div>
-
-          {/* Instagram */}
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pink-50">
-              <FaInstagram className="text-[21px] text-pink-500" />
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                Instagram DMs & Comments
-              </h3>
-              <p className="mt-1 text-xs leading-5 text-gray-500">
-                Auto-replies + creator tools
-              </p>
-            </div>
-          </div>
-
-          {/* Email */}
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-              <FaEnvelope className="text-[19px] text-blue-500" />
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                Email Marketing
-              </h3>
-              <p className="mt-1 text-xs leading-5 text-gray-500">
-                Drag-and-drop journeys
-              </p>
-            </div>
-          </div>
-
-          {/* SMS */}
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-50">
-              <FaSms className="text-[21px] text-purple-500" />
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                SMS Broadcast
-              </h3>
-              <p className="mt-1 text-xs leading-5 text-gray-500">
-                DLT-compliant routing
-              </p>
-            </div>
-          </div>
-
-          {/* AI Voice */}
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50">
-              <FaMicrophone className="text-[18px] text-orange-500" />
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                AI Voice Agents
-              </h3>
-              <p className="mt-1 text-xs leading-5 text-gray-500">
-                24/7 inbound + outbound
-              </p>
-            </div>
-          </div>
-
-          {/* AI Chatbots */}
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
-              <FaRobot className="text-[20px] text-indigo-500" />
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                AI Chatbots
-              </h3>
-              <p className="mt-1 text-xs leading-5 text-gray-500">
-                RAG over your data
-              </p>
-            </div>
-          </div>
-
-          {/* Funnels */}
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50">
-              <span className="text-xl font-semibold text-gray-600">
-                ◇
-              </span>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                Funnels & Page Builder
-              </h3>
-              <p className="mt-1 text-xs leading-5 text-gray-500">
-                Lead capture in minutes
-              </p>
-            </div>
-          </div>
-
-          {/* Workflow */}
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                className="text-emerald-600"
-              >
-                <path d="M6 3v6" />
-                <path d="M18 15v6" />
-                <path d="M6 9c0 3 2 6 6 6s6-3 6-6" />
-                <path d="M3 3h6" />
-                <path d="M15 21h6" />
-              </svg>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                Workflow Automations
-              </h3>
-              <p className="mt-1 text-xs leading-5 text-gray-500">
-                Connect your entire workflow
-              </p>
-            </div>
-          </div>
-
-          {/* Blue Tick */}
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white">
-                <FaCheck className="text-[9px]" />
-              </span>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                Free Blue Tick Application
-              </h3>
-              <p className="mt-1 text-xs leading-5 text-gray-500">
-                Get your business verified
-              </p>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Security */}
-        <div className="mt-10 border-t border-gray-100 pt-6">
-
-          <div className="flex items-center gap-5 whitespace-nowrap">
-
-            <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 bg-white">
-                <FaLock className="text-[9px] text-gray-500" />
-              </div>
-
-              <span className="text-[10px] font-medium text-gray-500">
-                ISO 27001
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 bg-white">
-                <FaCheck className="text-[10px] text-green-600" />
-              </div>
-
-              <span className="text-[10px] font-medium text-gray-500">
-                GDPR ready
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 bg-white">
-                <FaBolt className="text-[10px] text-yellow-500" />
-              </div>
-
-              <span className="text-[10px] font-medium text-gray-500">
-                99.99% uptime
-              </span>
-            </div>
-
-          </div>
-
-          <p className="mt-4 text-sm font-semibold text-gray-800">
-            Trusted by 12,000+ brands
-          </p>
-
-        </div>
-
-        {/* Footer */}
-        <div className="mt-auto pt-10 text-xs text-gray-400">
-          <span>© 2026 Superblock</span>
-          {" · "}
-          <span>Privacy</span>
-          {" · "}
-          <span>Terms</span>
-        </div>
-
-      </section>
-
-      {/* =====================================================
-          RIGHT SIDE
-      ===================================================== */}
-
-      <section className="flex w-1/2 items-center justify-center border-l border-gray-100 bg-gray-50 px-16 py-10">
-
-        <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-10 shadow-sm">
-
-          {/* Steps */}
-          <div className="flex items-center gap-3">
-
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-700 text-sm font-semibold text-white">
-              1
-            </div>
-
-            <span className="text-sm font-semibold text-gray-900">
-              Account
-            </span>
-
-            <div className="h-px flex-1 bg-gray-200" />
-
-            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-sm text-gray-500">
-              2
-            </div>
-
-            <span className="text-sm text-gray-500">
-              Business
+            <span className="text-[11px] font-medium leading-[16.5px] tracking-[0.88px] text-[#064E3B]">
+              FREE FOREVER · NO CREDIT CARD
             </span>
 
           </div>
 
-          {/* Heading */}
-          <h2 className="mt-10 text-3xl font-bold tracking-tight text-gray-900">
-            Create your account
-          </h2>
+          {/* Main Heading */}
+          <h1 className="mt-7 max-w-[620px] text-[44px] font-semibold leading-[46.2px] tracking-[-0.88px] text-[#0A0A0A]">
 
-          <p className="mt-2 text-sm text-gray-500">
-            Get started with Superblock — takes under a minute
+            Every channel your customers
+            <br />
+
+            use,{" "}
+            <span className="text-[#064E3B]">
+              in one workspace
+            </span>
+
+          </h1>
+
+          {/* Description */}
+          <p className="mt-5 max-w-[448px] text-[15px] font-normal leading-[23.25px] text-[#525252]">
+
+            WhatsApp, RCS, Instagram, Email, SMS, AI voice,
+            chatbots, automations and funnels — built for teams
+            that need to ship and scale.
+
           </p>
 
-          {/* Full Name */}
-          <div className="mt-8">
+          {/* Feature heading */}
+          <p className="mt-10 text-[11px] font-medium leading-[16.5px] tracking-[0.88px] text-[#8E8B85]">
 
-            <label className="text-sm font-medium text-gray-800">
-              Full name{" "}
-              <span className="text-red-500">*</span>
-            </label>
+            BUILT INTO YOUR WORKSPACE
 
-            <input
-              type="text"
-              placeholder="Jane Smith"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100"
+          </p>
+
+          {/* =====================================================
+              FEATURE GRID
+          ===================================================== */}
+
+          <div className="mt-3 grid max-w-[620px] grid-cols-2 gap-3">
+
+            {/* WhatsApp */}
+            <FeatureCard
+              icon={
+                <FaWhatsapp className="text-[17px] text-[#16A34A]" />
+              }
+              iconBg="bg-[#E8F8EE]"
+              title="WhatsApp Business API"
+              description="Official Meta integration"
+            />
+
+            {/* RCS */}
+            <FeatureCard
+              icon={
+                <SiGooglemessages className="text-[17px] text-[#FF5B76]" />
+              }
+              iconBg="bg-[#FFE9ED]"
+              title="RCS Business Messaging"
+              description="Verified branded chats"
+            />
+
+            {/* Instagram */}
+            <FeatureCard
+              icon={
+                <FaInstagram className="text-[16px] text-[#FF4D91]" />
+              }
+              iconBg="bg-[#FDE8F0]"
+              title="Instagram DMs & Comments"
+              description="Auto-replies + creator tools"
+            />
+
+            {/* Email */}
+            <FeatureCard
+              icon={
+                <FaEnvelope className="text-[16px] text-[#149BD7]" />
+              }
+              iconBg="bg-[#E5F5FC]"
+              title="Email Marketing"
+              description="Drag-and-drop journeys"
+            />
+
+            {/* SMS */}
+            <FeatureCard
+              icon={
+                <FaSms className="text-[15px] text-[#8957E5]" />
+              }
+              iconBg="bg-[#F0E8FF]"
+              title="SMS Broadcast"
+              description="DLT-compliant routing"
+            />
+
+            {/* AI Voice */}
+            <FeatureCard
+              icon={
+                <FaMicrophone className="text-[15px] text-[#F59E0B]" />
+              }
+              iconBg="bg-[#FFF1DC]"
+              title="AI Voice Agents"
+              description="24/7 inbound + outbound"
+            />
+
+            {/* AI Chatbots */}
+            <FeatureCard
+              icon={
+                <FaRobot className="text-[16px] text-[#16B981]" />
+              }
+              iconBg="bg-[#DDF7EE]"
+              title="AI Chatbots"
+              description="RAG over your data"
+            />
+
+            {/* Funnels */}
+            <FeatureCard
+              icon={
+                <span className="text-[18px] text-[#169BE5]">
+                  ▣
+                </span>
+              }
+              iconBg="bg-[#E5F4FC]"
+              title="Funnels & Page Builder"
+              description="Lead capture in minutes"
+            />
+
+            {/* Workflow */}
+            <FeatureCard
+              icon={
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  className="text-[#176B61]"
+                >
+                  <path d="M6 3v6" />
+                  <path d="M18 15v6" />
+                  <path d="M6 9c0 3 2 6 6 6s6-3 6-6" />
+                  <path d="M3 3h6" />
+                  <path d="M15 21h6" />
+                </svg>
+              }
+              iconBg="bg-[#E5F0EE]"
+              title="Workflow Automations"
+              description="Connect your entire workflow"
+            />
+
+            {/* Blue Tick */}
+            <FeatureCard
+              icon={
+                <span className="flex h-[17px] w-[17px] items-center justify-center rounded-full bg-[#38A5E8] text-white">
+                  <FaCheck className="text-[8px]" />
+                </span>
+              }
+              iconBg="bg-[#E5F4FC]"
+              title="Free Blue Tick Application"
+              description="Get your business verified"
             />
 
           </div>
-
-          {/* Email */}
-          <div className="mt-5">
-
-            <label className="text-sm font-medium text-gray-800">
-              Work email{" "}
-              <span className="text-red-500">*</span>
-            </label>
-
-            <input
-              type="email"
-              placeholder="jane@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100"
-            />
-
-          </div>
-
-          {/* Password */}
-          <div className="mt-5">
-
-            <label className="text-sm font-medium text-gray-800">
-              Password{" "}
-              <span className="text-red-500">*</span>
-            </label>
-
-            <div className="relative mt-2">
-
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Min. 8 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 pr-12 text-sm outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100"
-              />
-
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={
-                  showPassword
-                    ? "Hide password"
-                    : "Show password"
-                }
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-
-            </div>
-
-          </div>
-
-          {/* Continue */}
-          <button
-            type="button"
-            onClick={handleSignup}
-            disabled={loading}
-            className="mt-6 w-full rounded-lg bg-green-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {loading ? "Creating account..." : "Continue →"}
-          </button>
 
           {/* Security */}
-          <p className="mt-6 text-center text-xs text-gray-500">
-            🔒 256-bit encryption · Your data is secure
-          </p>
+          <div className="mt-10 border-t border-[#E7E5E0] pt-5">
 
-          {/* Sign In */}
-          <div className="mt-8 border-t border-gray-100 pt-7 text-center text-sm text-gray-500">
-            Already have an account?
+            <div className="flex items-center gap-5">
 
-            <span className="ml-1 cursor-pointer font-semibold text-green-700">
-              Sign in
-            </span>
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+                  <FaLock className="text-[9px] text-[#8E8B85]" />
+                </div>
+
+                <span className="text-[10px] font-medium text-[#8E8B85]">
+                  ISO 27001
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+                  <FaCheck className="text-[9px] text-[#16A34A]" />
+                </div>
+
+                <span className="text-[10px] font-medium text-[#8E8B85]">
+                  GDPR ready
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+                  <FaBolt className="text-[9px] text-[#EAB308]" />
+                </div>
+
+                <span className="text-[10px] font-medium text-[#8E8B85]">
+                  99.99% uptime
+                </span>
+              </div>
+
+            </div>
+
+            <p className="mt-4 text-[13px] font-medium text-[#525252]">
+              Trusted by 12,000+ brands
+            </p>
+
           </div>
 
           {/* Footer */}
-          <div className="mt-10 text-center text-xs text-gray-400">
+          <div className="mt-auto pt-8 text-[11px] text-[#8E8B85]">
+
             © 2026 Superblock
             {" · "}
             Privacy
             {" · "}
             Terms
+
           </div>
 
-        </div>
+        </section>
 
-      </section>
+
+        {/* =====================================================
+            RIGHT SIDE
+        ===================================================== */}
+
+        <section className="flex w-[45%] items-center justify-center border-l border-[#E7E5E0] bg-[#FAFAF8] px-10">
+
+          {/* Signup Card */}
+          <div className="w-full max-w-[420px] rounded-[12px] border border-[#E7E5E0] bg-white p-8">
+
+            {/* Steps */}
+            <div className="flex items-center gap-3">
+
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#064E3B] text-[12px] font-medium text-[#064E3B]">
+                1
+              </div>
+
+              <span className="text-[12px] font-medium text-[#0A0A0A]">
+                Account
+              </span>
+
+              <div className="h-px flex-1 bg-[#E7E5E0]" />
+
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#E7E5E0] text-[12px] text-[#8E8B85]">
+                2
+              </div>
+
+              <span className="text-[12px] text-[#8E8B85]">
+                Business
+              </span>
+
+            </div>
+
+
+            {/* Heading */}
+            <h2 className="mt-8 text-[24px] font-semibold leading-[27.6px] tracking-[-0.36px] text-[#0A0A0A]">
+              Create your account
+            </h2>
+
+            <p className="mt-1.5 text-[13.5px] leading-[20.25px] text-[#8E8B85]">
+              Get started with Superblock — takes under a minute
+            </p>
+
+
+            {/* Full Name */}
+            <div className="mt-7">
+
+              <label className="text-[13px] font-medium leading-[19.5px] text-[#525252]">
+                Full name{" "}
+                <span className="text-[#EF4444]">*</span>
+              </label>
+
+         <input
+  type="text"
+  placeholder="Jane Smith"
+  value={fullName}
+  onChange={(e) => {
+    setFullName(e.target.value);
+    setErrors((prev) => ({ ...prev, fullName: "" }));
+  }}
+  className={`mt-2 h-10 w-full rounded-[8px] border bg-white px-3 text-[13px] text-[#0A0A0A] outline-none placeholder:text-[#8E8B85] focus:border-[#064E3B] ${
+    errors.fullName ? "border-[#EF4444]" : "border-[#E7E5E0]"
+  }`}
+/>
+
+{errors.fullName && (
+  <p className="mt-1 text-[11px] text-[#EF4444]">
+    {errors.fullName}
+  </p>
+)}
+
+            </div>
+
+
+            {/* Email */}
+            <div className="mt-4">
+
+              <label className="text-[13px] font-medium leading-[19.5px] text-[#525252]">
+                Work email{" "}
+                <span className="text-[#EF4444]">*</span>
+              </label>
+
+             <input
+  type="email"
+  placeholder="jane@company.com"
+  value={email}
+  onChange={(e) => {
+    setEmail(e.target.value);
+    setErrors((prev) => ({ ...prev, email: "" }));
+  }}
+  className={`mt-2 h-10 w-full rounded-[8px] border bg-white px-3 text-[13px] text-[#0A0A0A] outline-none placeholder:text-[#8E8B85] focus:border-[#064E3B] ${
+    errors.email ? "border-[#EF4444]" : "border-[#E7E5E0]"
+  }`}
+/>
+
+{errors.email && (
+  <p className="mt-1 text-[11px] text-[#EF4444]">
+    {errors.email}
+  </p>
+)}
+
+            </div>
+
+
+            {/* Password */}
+            <div className="mt-4">
+              {errors.password && (
+  <p className="mt-1 text-[11px] text-[#EF4444]">
+    {errors.password}
+  </p>
+)}
+
+
+              <label className="text-[13px] font-medium leading-[19.5px] text-[#525252]">
+                Password{" "}
+                <span className="text-[#EF4444]">*</span>
+              </label>
+
+              <div className="relative mt-2">
+
+               <input
+  type={showPassword ? "text" : "password"}
+  placeholder="Min. 8 characters"
+  value={password}
+  onChange={(e) => {
+    setPassword(e.target.value);
+    setErrors((prev) => ({ ...prev, password: "" }));
+  }}
+  className="h-10 w-full rounded-[8px] border border-[#E7E5E0] bg-white px-3 pr-10 text-[13px] text-[#0A0A0A] outline-none placeholder:text-[#8E8B85] focus:border-[#064E3B]"
+/>
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8B85]"
+                  aria-label={
+                    showPassword
+                      ? "Hide password"
+                      : "Show password"
+                  }
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+
+              </div>
+
+            </div>
+
+
+            {/* Continue */}
+            <button
+              type="button"
+              onClick={handleSignup}
+              disabled={loading}
+              className="mt-6 h-10 w-full rounded-[8px] bg-[#064E3B] text-[13px] font-medium text-[#FAFAFA] transition hover:bg-[#053D30] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading ? "Creating account..." : "Continue   →"}
+            </button>
+
+
+            {/* Encryption */}
+            <p className="mt-6 flex items-center justify-center gap-1.5 text-[12px] text-[#8E8B85]">
+              <FaLock className="text-[11px]" />
+              256-bit encryption
+            </p>
+
+
+            {/* Sign In */}
+            <div className="mt-7 border-t border-[#E7E5E0] pt-7 text-center text-[13px] text-[#525252]">
+
+              Already have an account?
+
+              <span className="ml-1 cursor-pointer font-medium text-[#064E3B]">
+                Sign in
+              </span>
+
+            </div>
+
+
+            {/* Footer */}
+            <div className="mt-8 text-center text-[11px] text-[#8E8B85]">
+
+              © 2026 Superblock
+              {" · "}
+              Privacy
+              {" · "}
+              Terms
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
 
     </main>
+  );
+}
+
+
+/* ============================================================
+   FEATURE CARD COMPONENT
+============================================================ */
+
+function FeatureCard({
+  icon,
+  iconBg,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  iconBg: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="flex h-[60px] items-center gap-3 rounded-[8px] border border-[#E7E5E0] bg-white px-3">
+
+      <div
+        className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-[7px] ${iconBg}`}
+      >
+        {icon}
+      </div>
+
+      <div className="min-w-0">
+
+        <h3 className="truncate text-[13px] font-medium leading-[19px] text-[#0A0A0A]">
+          {title}
+        </h3>
+
+        <p className="truncate text-[11px] leading-[16px] text-[#8E8B85]">
+          {description}
+        </p>
+
+      </div>
+
+    </div>
   );
 }
