@@ -313,41 +313,55 @@ export default function Home() {
           </div>
 
           {/* Security */}
+
+          
           <div className="mt-10 border-t border-[#E7E5E0] pt-5">
 
-            <div className="flex items-center gap-5">
+  <div className="flex items-center gap-5">
 
-              <div className="flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
-                  <FaLock className="text-[9px] text-[#8E8B85]" />
-                </div>
+    {/* SOC 2 Type II */}
+    <div className="flex items-center gap-2">
+      <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+        🛡️
+      </div>
+      <span className="text-[10px] font-medium text-[#8E8B85]">
+        SOC 2 Type II
+      </span>
+    </div>
 
-                <span className="text-[10px] font-medium text-[#8E8B85]">
-                  ISO 27001
-                </span>
-              </div>
+    {/* ISO 27001 */}
+    <div className="flex items-center gap-2">
+      <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+        <FaLock className="text-[9px] text-[#8E8B85]" />
+      </div>
+      <span className="text-[10px] font-medium text-[#8E8B85]">
+        ISO 27001
+      </span>
+    </div>
 
-              <div className="flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
-                  <FaCheck className="text-[9px] text-[#16A34A]" />
-                </div>
+    {/* GDPR */}
+    <div className="flex items-center gap-2">
+      <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+        <FaCheck className="text-[9px] text-[#16A34A]" />
+      </div>
+      <span className="text-[10px] font-medium text-[#8E8B85]">
+        GDPR ready
+      </span>
+    </div>
 
-                <span className="text-[10px] font-medium text-[#8E8B85]">
-                  GDPR ready
-                </span>
-              </div>
+    {/* 99.99% uptime */}
+    <div className="flex items-center gap-2">
+      <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+        <FaBolt className="text-[9px] text-[#EAB308]" />
+      </div>
+      <span className="text-[10px] font-medium text-[#8E8B85]">
+        99.99% uptime
+      </span>
+    </div>
 
-              <div className="flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
-                  <FaBolt className="text-[9px] text-[#EAB308]" />
-                </div>
+  </div>
 
-                <span className="text-[10px] font-medium text-[#8E8B85]">
-                  99.99% uptime
-                </span>
-              </div>
-
-            </div>
+ 
 
             <p className="mt-4 text-[13px] font-medium text-[#525252]">
               Trusted by 12,000+ brands
