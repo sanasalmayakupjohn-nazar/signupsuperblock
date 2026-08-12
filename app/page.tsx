@@ -553,12 +553,16 @@ export default function Home() {
             <div className="mt-7 border-t border-[#E7E5E0] pt-7 text-center text-[13px] text-[#525252]">
 
               Already have an account?
+              <span
+  className="ml-1 cursor-pointer font-medium text-[#064E3B]"
+  onClick={() => {
+    window.location.href = "/login";
+  }}
+>
+  Sign in
+</span>
 
-              <span className="ml-1 cursor-pointer font-medium text-[#064E3B]">
-                Sign in
-              </span>
-
-            </div>
+                  </div>
 
 
             {/* Footer */}
