@@ -36,38 +36,27 @@ export default function Home() {
  const handleSignup = async () => {
   console.log("Signup started");
 
-  const newErrors = {
-    fullName: "",
-    email: "",
-    password: "",
-  };
-
-  // Full name validation
-  if (!fullName.trim()) {
-    newErrors.fullName = "Full name is required.";
+  if (!fullName.trim() || !email.trim() || !password.trim()) {
+    alert("Please fill in all fields.");
+    return;
   }
 
-  // Email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (!email.trim()) {
-    newErrors.email = "Email is required.";
-  } else if (!emailRegex.test(email.trim())) {
-    newErrors.email = "Enter a valid email address.";
-  }
-
-  // Password validation
-  if (!password) {
-    newErrors.password = "Password is required.";
-  } else if (password.length < 8) {
-    newErrors.password = "Password must be at least 8 characters.";
-  }
-
-  setErrors(newErrors);
-
-  // Stop if validation failed
-  if (newErrors.fullName || newErrors.email || newErrors.password) {
+  if (!emailRegex.test(email.trim())) {
+    alert("Please enter a valid email address.");
     return;
+  }
+
+  if (password.length < 8) {
+    alert("Password must be at least 8 characters.");
+    return;
+  }
+   if (!/[A-Z]/.test(password)) {
+    return "Password must contain at least one uppercase letter.";
+  }
+  if (!/[0-9]/.test(password)) {
+    return "Password must contain at least one number.";
   }
 
   setLoading(true);
@@ -75,11 +64,14 @@ export default function Home() {
   try {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
-      password: password,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/login`,
+      },
     });
 
     if (error) {
-      console.error("Auth error:", error);
+      console.error("Signup error:", error);
       alert(error.message);
       return;
     }
@@ -89,6 +81,11 @@ export default function Home() {
       return;
     }
 
+    console.log("Supabase user created:", data.user);
+
+    /*
+     * Create profile record
+     */
     const { error: profileError } = await supabase
       .from("superblockusers")
       .insert({
@@ -98,31 +95,37 @@ export default function Home() {
       });
 
     if (profileError) {
-      console.error("Database insert error:", profileError);
-      alert(profileError.message);
+      console.error(
+        "Profile insert error:",
+        profileError
+      );
+
+      alert(
+        "Account was created, but your profile could not be saved."
+      );
+
       return;
     }
 
-    alert("Account created successfully!");
+    alert(
+      "Account created successfully! Please verify your email before signing in."
+    );
 
     setFullName("");
     setEmail("");
     setPassword("");
 
-    setErrors({
-      fullName: "",
-      email: "",
-      password: "",
-    });
-
   } catch (error) {
-    console.error("Unexpected error:", error);
-    alert("Something went wrong. Check the browser console.");
+    console.error("Unexpected signup error:", error);
+
+    alert(
+      "Something went wrong. Please try again."
+    );
+
   } finally {
     setLoading(false);
   }
 };
-
   return (
     <main className="min-h-screen w-full bg-[#FAFAF8] text-[#0A0A0A]">
 

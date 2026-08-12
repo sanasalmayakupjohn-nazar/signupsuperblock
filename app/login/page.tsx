@@ -33,63 +33,110 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    const newErrors = {
-      email: "",
-      password: "",
-    };
+  const newErrors = {
+    email: "",
+    password: "",
+  };
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!email.trim()) {
-      newErrors.email = "Email is required.";
-    } else if (!emailRegex.test(email.trim())) {
-      newErrors.email = "Enter a valid email address.";
-    }
+  if (!email.trim()) {
+    newErrors.email = "Email is required.";
+  } else if (!emailRegex.test(email.trim())) {
+    newErrors.email = "Enter a valid email address.";
+  }
 
-    // Password validation
-    if (!password) {
-      newErrors.password = "Password is required.";
-    }
+  if (!password) {
+    newErrors.password = "Password is required.";
+  }
 
-    setErrors(newErrors);
+  
+  setErrors(newErrors);
 
-    if (newErrors.email || newErrors.password) {
+  if (newErrors.email || newErrors.password) {
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+   if (error) {
+      console.error("Login error:", error);
+
+      if (
+        error.message.toLowerCase().includes("email not confirmed")
+      ) {
+        alert(
+          "Please verify your email before signing in."
+        );
+      } else {
+        alert("Invalid email or password.");
+      }
+
       return;
     }
+   /*if (error) {
+  console.error("LOGIN ERROR:", error);
+  console.log("ERROR MESSAGE:", error.message);
+  console.log("ERROR CODE:", error.code);
+  console.log("ERROR STATUS:", error.status);
 
-    setLoading(true);
+  alert(error.message);
 
-    try {
-      const { data, error } =
-        await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
+  return;
+}*/
 
-      if (error) {
-        console.error("Login error:", error);
-        alert("Invalid email or password.");
-        return;
-      }
+   if (!data.user || !data.session) {
+  alert("Login session was not created.");
+  return;
+}
 
-      if (!data.user) {
-        alert("Login failed.");
-        return;
-      }
+const token = data.session.access_token;
 
-      alert("Logged in successfully!");
+console.log("Logged in user:", data.user);
+console.log("JWT:", token);
 
-      setEmail("");
-      setPassword("");
+// Call protected API
+const response = await fetch("/api/user-data", {
+  method: "GET",
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
-    } catch (error) {
-      console.error("Unexpected error:", error);
-      alert("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+const result = await response.json();
+
+// ✅ Use JSON.stringify to see full object
+console.log("API response:", JSON.stringify(result, null, 2));
+console.log("User data from API:", JSON.stringify(result.user, null, 2));
+
+if (!response.ok) {
+  alert(result.error || "API request failed.");
+  return;
+}
+
+console.log("User data from API:", result.user);
+
+alert(
+  `Login successful!\nWelcome ${result.user.full_name}`
+);
+
+    // We will use this token for the protected API
+    // in the next step.
+
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    alert("Something went wrong. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <main className="min-h-screen w-full bg-[#FAFAF8] text-[#0A0A0A]">
