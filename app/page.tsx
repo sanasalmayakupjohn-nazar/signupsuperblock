@@ -27,108 +27,193 @@ export default function Home() {
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
+
   const [errors, setErrors] = useState({
-  fullName: "",
-  email: "",
-  password: "",
-});
+    fullName: "",
+    email: "",
+    password: "",
+  });
 
- const handleSignup = async () => {
-  console.log("Signup started");
+  const handleSignup = async () => {
+    console.log("Signup started");
 
-  if (!fullName.trim() || !email.trim() || !password.trim()) {
-    alert("Please fill in all fields.");
-    return;
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if (!emailRegex.test(email.trim())) {
-    alert("Please enter a valid email address.");
-    return;
-  }
-
-  if (password.length < 8) {
-    alert("Password must be at least 8 characters.");
-    return;
-  }
-   if (!/[A-Z]/.test(password)) {
-    return "Password must contain at least one uppercase letter.";
-  }
-  if (!/[0-9]/.test(password)) {
-    return "Password must contain at least one number.";
-  }
-
-  setLoading(true);
-
-  try {
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/login`,
-      },
+    setErrors({
+      fullName: "",
+      email: "",
+      password: "",
     });
 
-    if (error) {
-      console.error("Signup error:", error);
-      alert(error.message);
+    let hasError = false;
+
+    // Full name validation
+    if (!fullName.trim()) {
+      setErrors((prev) => ({
+        ...prev,
+        fullName: "Full name is required.",
+      }));
+
+      hasError = true;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email.trim()) {
+      setErrors((prev) => ({
+        ...prev,
+        email: "Email is required.",
+      }));
+
+      hasError = true;
+    } else if (!emailRegex.test(email.trim())) {
+      setErrors((prev) => ({
+        ...prev,
+        email: "Please enter a valid email address.",
+      }));
+
+      hasError = true;
+    }
+
+    // Password validation
+    if (!password.trim()) {
+      setErrors((prev) => ({
+        ...prev,
+        password: "Password is required.",
+      }));
+
+      hasError = true;
+    } else if (password.length < 8) {
+      setErrors((prev) => ({
+        ...prev,
+        password: "Password must be at least 8 characters.",
+      }));
+
+      hasError = true;
+    } else if (!/[A-Z]/.test(password)) {
+      setErrors((prev) => ({
+        ...prev,
+        password:
+          "Password must contain at least one uppercase letter.",
+      }));
+
+      hasError = true;
+    } else if (!/[0-9]/.test(password)) {
+      setErrors((prev) => ({
+        ...prev,
+        password:
+          "Password must contain at least one number.",
+      }));
+
+      hasError = true;
+    }
+
+    // Stop if validation failed
+    if (hasError) {
       return;
     }
 
-    if (!data.user) {
-      alert("Account creation failed.");
-      return;
-    }
+    setLoading(true);
 
-    console.log("Supabase user created:", data.user);
+    try {
+      // ==============================
+      // CREATE SUPABASE USER
+      // ==============================
 
-    /*
-     * Create profile record
-     */
-    const { error: profileError } = await supabase
-      .from("superblockusers")
-      .insert({
-        id: data.user.id,
-        full_name: fullName.trim(),
+      const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+        },
       });
 
-    if (profileError) {
+      if (error) {
+        console.error("Signup error:", error);
+        alert(error.message);
+        return;
+      }
+
+      if (!data.user) {
+        alert("Account creation failed.");
+        return;
+      }
+
+      console.log("Supabase user created:", data.user);
+
+      // ==============================
+      // CREATE PROFILE
+      // ==============================
+
+      const { error: profileError } = await supabase
+        .from("superblockusers")
+        .insert({
+          id: data.user.id,
+          full_name: fullName.trim(),
+          email: email.trim(),
+        });
+
+      if (profileError) {
+        console.error(
+          "Profile insert error:",
+          profileError
+        );
+
+        alert(
+          "Account was created, but your profile could not be saved."
+        );
+
+        return;
+      }
+
+      // ==============================
+      // SEND DATA TO N8N
+      // ==============================
+
+      try {
+        await fetch(
+          process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL!,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: data.user.id,
+              full_name: fullName.trim(),
+              email: email.trim(),
+            }),
+          }
+        );
+
+        console.log("Signup data sent to n8n");
+      } catch (n8nError) {
+        console.error(
+          "n8n webhook error:",
+          n8nError
+        );
+      }
+
+      // ==============================
+      // GO TO BUSINESS SIGNUP
+      // ==============================
+
+      window.location.href = "/signup/business";
+    } catch (error) {
       console.error(
-        "Profile insert error:",
-        profileError
+        "Unexpected signup error:",
+        error
       );
 
       alert(
-        "Account was created, but your profile could not be saved."
+        "Something went wrong. Please try again."
       );
-
-      return;
+    } finally {
+      setLoading(false);
     }
+  };
 
-    alert(
-      "Account created successfully! Please verify your email before signing in."
-    );
-
-    setFullName("");
-    setEmail("");
-    setPassword("");
-
-  } catch (error) {
-    console.error("Unexpected signup error:", error);
-
-    alert(
-      "Something went wrong. Please try again."
-    );
-
-  } finally {
-    setLoading(false);
-  }
-};
   return (
     <main className="min-h-screen w-full bg-[#FAFAF8] text-[#0A0A0A]">
-
       <div className="flex min-h-screen">
 
         {/* =====================================================
@@ -138,55 +223,50 @@ export default function Home() {
         <section className="flex w-[55%] flex-col px-[52px] py-[52px]">
 
           {/* Logo */}
-      {/* Logo */}
-<div className="flex items-center">
-  <img
-    src="/super block 1.png"
-    alt="Superblock"
-    className="h-[34px] w-[128px] object-contain"
-  />
 
-  <span className="ml-[-35px] text-[24px] font-semibold tracking-[-0.4px] text-[#008A43]">
-    Superblock
-  </span>
-</div>
+          <div className="flex items-center">
+            <img
+              src="/super block 1.png"
+              alt="Superblock"
+              className="h-[34px] w-[128px] object-contain"
+            />
+
+            <span className="ml-[-35px] text-[24px] font-semibold tracking-[-0.4px] text-[#008A43]">
+              Superblock
+            </span>
+          </div>
 
           {/* Badge */}
-          <div className="mt-14 inline-flex w-fit rounded-full bg-[#E8EFEC] px-[10px] py-[5px]">
 
+          <div className="mt-14 inline-flex w-fit rounded-full bg-[#E8EFEC] px-[10px] py-[5px]">
             <span className="text-[11px] font-medium leading-[16.5px] tracking-[0.88px] text-[#064E3B]">
               FREE FOREVER · NO CREDIT CARD
             </span>
-
           </div>
 
           {/* Main Heading */}
-          <h1 className="mt-7 max-w-[620px] text-[44px] font-semibold leading-[46.2px] tracking-[-0.88px] text-[#0A0A0A]">
 
+          <h1 className="mt-7 max-w-[620px] text-[44px] font-semibold leading-[46.2px] tracking-[-0.88px] text-[#0A0A0A]">
             Every channel your customers
             <br />
-
             use,{" "}
             <span className="text-[#064E3B]">
               in one workspace
             </span>
-
           </h1>
 
           {/* Description */}
-          <p className="mt-5 max-w-[448px] text-[15px] font-normal leading-[23.25px] text-[#525252]">
 
+          <p className="mt-5 max-w-[448px] text-[15px] font-normal leading-[23.25px] text-[#525252]">
             WhatsApp, RCS, Instagram, Email, SMS, AI voice,
             chatbots, automations and funnels — built for teams
             that need to ship and scale.
-
           </p>
 
-          {/* Feature heading */}
+          {/* Feature Heading */}
+
           <p className="mt-10 text-[11px] font-medium leading-[16.5px] tracking-[0.88px] text-[#8E8B85]">
-
             BUILT INTO YOUR WORKSPACE
-
           </p>
 
           {/* =====================================================
@@ -196,6 +276,7 @@ export default function Home() {
           <div className="mt-3 grid max-w-[620px] grid-cols-2 gap-3">
 
             {/* WhatsApp */}
+
             <FeatureCard
               icon={
                 <FaWhatsapp className="text-[17px] text-[#16A34A]" />
@@ -206,6 +287,7 @@ export default function Home() {
             />
 
             {/* RCS */}
+
             <FeatureCard
               icon={
                 <SiGooglemessages className="text-[17px] text-[#FF5B76]" />
@@ -216,6 +298,7 @@ export default function Home() {
             />
 
             {/* Instagram */}
+
             <FeatureCard
               icon={
                 <FaInstagram className="text-[16px] text-[#FF4D91]" />
@@ -226,6 +309,7 @@ export default function Home() {
             />
 
             {/* Email */}
+
             <FeatureCard
               icon={
                 <FaEnvelope className="text-[16px] text-[#149BD7]" />
@@ -236,6 +320,7 @@ export default function Home() {
             />
 
             {/* SMS */}
+
             <FeatureCard
               icon={
                 <FaSms className="text-[15px] text-[#8957E5]" />
@@ -246,6 +331,7 @@ export default function Home() {
             />
 
             {/* AI Voice */}
+
             <FeatureCard
               icon={
                 <FaMicrophone className="text-[15px] text-[#F59E0B]" />
@@ -256,6 +342,7 @@ export default function Home() {
             />
 
             {/* AI Chatbots */}
+
             <FeatureCard
               icon={
                 <FaRobot className="text-[16px] text-[#16B981]" />
@@ -266,6 +353,7 @@ export default function Home() {
             />
 
             {/* Funnels */}
+
             <FeatureCard
               icon={
                 <span className="text-[18px] text-[#169BE5]">
@@ -278,6 +366,7 @@ export default function Home() {
             />
 
             {/* Workflow */}
+
             <FeatureCard
               icon={
                 <svg
@@ -302,6 +391,7 @@ export default function Home() {
             />
 
             {/* Blue Tick */}
+
             <FeatureCard
               icon={
                 <span className="flex h-[17px] w-[17px] items-center justify-center rounded-full bg-[#38A5E8] text-white">
@@ -312,59 +402,63 @@ export default function Home() {
               title="Free Blue Tick Application"
               description="Get your business verified"
             />
-
           </div>
 
           {/* Security */}
 
-          
           <div className="mt-10 border-t border-[#E7E5E0] pt-5">
 
-  <div className="flex items-center gap-5">
+            <div className="flex items-center gap-5">
 
-    {/* SOC 2 Type II */}
-    <div className="flex items-center gap-2">
-      <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
-        🛡️
-      </div>
-      <span className="text-[10px] font-medium text-[#8E8B85]">
-        SOC 2 Type II
-      </span>
-    </div>
+              {/* SOC 2 */}
 
-    {/* ISO 27001 */}
-    <div className="flex items-center gap-2">
-      <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
-        <FaLock className="text-[9px] text-[#8E8B85]" />
-      </div>
-      <span className="text-[10px] font-medium text-[#8E8B85]">
-        ISO 27001
-      </span>
-    </div>
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+                  🛡️
+                </div>
 
-    {/* GDPR */}
-    <div className="flex items-center gap-2">
-      <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
-        <FaCheck className="text-[9px] text-[#16A34A]" />
-      </div>
-      <span className="text-[10px] font-medium text-[#8E8B85]">
-        GDPR ready
-      </span>
-    </div>
+                <span className="text-[10px] font-medium text-[#8E8B85]">
+                  SOC 2 Type II
+                </span>
+              </div>
 
-    {/* 99.99% uptime */}
-    <div className="flex items-center gap-2">
-      <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
-        <FaBolt className="text-[9px] text-[#EAB308]" />
-      </div>
-      <span className="text-[10px] font-medium text-[#8E8B85]">
-        99.99% uptime
-      </span>
-    </div>
+              {/* ISO */}
 
-  </div>
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+                  <FaLock className="text-[9px] text-[#8E8B85]" />
+                </div>
 
- 
+                <span className="text-[10px] font-medium text-[#8E8B85]">
+                  ISO 27001
+                </span>
+              </div>
+
+              {/* GDPR */}
+
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+                  <FaCheck className="text-[9px] text-[#16A34A]" />
+                </div>
+
+                <span className="text-[10px] font-medium text-[#8E8B85]">
+                  GDPR ready
+                </span>
+              </div>
+
+              {/* Uptime */}
+
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+                  <FaBolt className="text-[9px] text-[#EAB308]" />
+                </div>
+
+                <span className="text-[10px] font-medium text-[#8E8B85]">
+                  99.99% uptime
+                </span>
+              </div>
+
+            </div>
 
             <p className="mt-4 text-[13px] font-medium text-[#525252]">
               Trusted by 12,000+ brands
@@ -373,18 +467,16 @@ export default function Home() {
           </div>
 
           {/* Footer */}
-          <div className="mt-auto pt-8 text-[11px] text-[#8E8B85]">
 
+          <div className="mt-auto pt-8 text-[11px] text-[#8E8B85]">
             © 2026 Superblock
             {" · "}
             Privacy
             {" · "}
             Terms
-
           </div>
 
         </section>
-
 
         {/* =====================================================
             RIGHT SIDE
@@ -393,9 +485,11 @@ export default function Home() {
         <section className="flex w-[45%] items-center justify-center border-l border-[#E7E5E0] bg-[#FAFAF8] px-10">
 
           {/* Signup Card */}
+
           <div className="w-full max-w-[420px] rounded-[12px] border border-[#E7E5E0] bg-white p-8">
 
             {/* Steps */}
+
             <div className="flex items-center gap-3">
 
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#064E3B] text-[12px] font-medium text-[#064E3B]">
@@ -418,8 +512,8 @@ export default function Home() {
 
             </div>
 
-
             {/* Heading */}
+
             <h2 className="mt-8 text-[24px] font-semibold leading-[27.6px] tracking-[-0.36px] text-[#0A0A0A]">
               Create your account
             </h2>
@@ -428,8 +522,8 @@ export default function Home() {
               Get started with Superblock — takes under a minute
             </p>
 
-
             {/* Full Name */}
+
             <div className="mt-7">
 
               <label className="text-[13px] font-medium leading-[19.5px] text-[#525252]">
@@ -437,29 +531,35 @@ export default function Home() {
                 <span className="text-[#EF4444]">*</span>
               </label>
 
-         <input
-  type="text"
-  placeholder="Jane Smith"
-  value={fullName}
-  onChange={(e) => {
-    setFullName(e.target.value);
-    setErrors((prev) => ({ ...prev, fullName: "" }));
-  }}
-  className={`mt-2 h-10 w-full rounded-[8px] border bg-white px-3 text-[13px] text-[#0A0A0A] outline-none placeholder:text-[#8E8B85] focus:border-[#064E3B] ${
-    errors.fullName ? "border-[#EF4444]" : "border-[#E7E5E0]"
-  }`}
-/>
+              <input
+                type="text"
+                placeholder="Jane Smith"
+                value={fullName}
+                onChange={(e) => {
+                  setFullName(e.target.value);
 
-{errors.fullName && (
-  <p className="mt-1 text-[11px] text-[#EF4444]">
-    {errors.fullName}
-  </p>
-)}
+                  setErrors((prev) => ({
+                    ...prev,
+                    fullName: "",
+                  }));
+                }}
+                className={`mt-2 h-10 w-full rounded-[8px] border bg-white px-3 text-[13px] text-[#0A0A0A] outline-none placeholder:text-[#8E8B85] focus:border-[#064E3B] ${
+                  errors.fullName
+                    ? "border-[#EF4444]"
+                    : "border-[#E7E5E0]"
+                }`}
+              />
+
+              {errors.fullName && (
+                <p className="mt-1 text-[11px] text-[#EF4444]">
+                  {errors.fullName}
+                </p>
+              )}
 
             </div>
 
-
             {/* Email */}
+
             <div className="mt-4">
 
               <label className="text-[13px] font-medium leading-[19.5px] text-[#525252]">
@@ -467,36 +567,36 @@ export default function Home() {
                 <span className="text-[#EF4444]">*</span>
               </label>
 
-             <input
-  type="email"
-  placeholder="jane@company.com"
-  value={email}
-  onChange={(e) => {
-    setEmail(e.target.value);
-    setErrors((prev) => ({ ...prev, email: "" }));
-  }}
-  className={`mt-2 h-10 w-full rounded-[8px] border bg-white px-3 text-[13px] text-[#0A0A0A] outline-none placeholder:text-[#8E8B85] focus:border-[#064E3B] ${
-    errors.email ? "border-[#EF4444]" : "border-[#E7E5E0]"
-  }`}
-/>
+              <input
+                type="email"
+                placeholder="jane@company.com"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
 
-{errors.email && (
-  <p className="mt-1 text-[11px] text-[#EF4444]">
-    {errors.email}
-  </p>
-)}
+                  setErrors((prev) => ({
+                    ...prev,
+                    email: "",
+                  }));
+                }}
+                className={`mt-2 h-10 w-full rounded-[8px] border bg-white px-3 text-[13px] text-[#0A0A0A] outline-none placeholder:text-[#8E8B85] focus:border-[#064E3B] ${
+                  errors.email
+                    ? "border-[#EF4444]"
+                    : "border-[#E7E5E0]"
+                }`}
+              />
+
+              {errors.email && (
+                <p className="mt-1 text-[11px] text-[#EF4444]">
+                  {errors.email}
+                </p>
+              )}
 
             </div>
 
-
             {/* Password */}
-            <div className="mt-4">
-              {errors.password && (
-  <p className="mt-1 text-[11px] text-[#EF4444]">
-    {errors.password}
-  </p>
-)}
 
+            <div className="mt-4">
 
               <label className="text-[13px] font-medium leading-[19.5px] text-[#525252]">
                 Password{" "}
@@ -505,20 +605,34 @@ export default function Home() {
 
               <div className="relative mt-2">
 
-               <input
-  type={showPassword ? "text" : "password"}
-  placeholder="Min. 8 characters"
-  value={password}
-  onChange={(e) => {
-    setPassword(e.target.value);
-    setErrors((prev) => ({ ...prev, password: "" }));
-  }}
-  className="h-10 w-full rounded-[8px] border border-[#E7E5E0] bg-white px-3 pr-10 text-[13px] text-[#0A0A0A] outline-none placeholder:text-[#8E8B85] focus:border-[#064E3B]"
-/>
+                <input
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
+                  placeholder="Min. 8 characters"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+
+                    setErrors((prev) => ({
+                      ...prev,
+                      password: "",
+                    }));
+                  }}
+                  className={`h-10 w-full rounded-[8px] border bg-white px-3 pr-10 text-[13px] text-[#0A0A0A] outline-none placeholder:text-[#8E8B85] focus:border-[#064E3B] ${
+                    errors.password
+                      ? "border-[#EF4444]"
+                      : "border-[#E7E5E0]"
+                  }`}
+                />
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() =>
+                    setShowPassword(!showPassword)
+                  }
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8B85]"
                   aria-label={
                     showPassword
@@ -526,57 +640,68 @@ export default function Home() {
                       : "Show password"
                   }
                 >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  {showPassword ? (
+                    <FaEyeSlash />
+                  ) : (
+                    <FaEye />
+                  )}
                 </button>
 
               </div>
 
+              {errors.password && (
+                <p className="mt-1 text-[11px] text-[#EF4444]">
+                  {errors.password}
+                </p>
+              )}
+
             </div>
 
-
             {/* Continue */}
+
             <button
               type="button"
               onClick={handleSignup}
               disabled={loading}
               className="mt-6 h-10 w-full rounded-[8px] bg-[#064E3B] text-[13px] font-medium text-[#FAFAFA] transition hover:bg-[#053D30] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading ? "Creating account..." : "Continue   →"}
+              {loading
+                ? "Creating account..."
+                : "Continue   →"}
             </button>
 
-
             {/* Encryption */}
+
             <p className="mt-6 flex items-center justify-center gap-1.5 text-[12px] text-[#8E8B85]">
               <FaLock className="text-[11px]" />
               256-bit encryption
             </p>
 
-
             {/* Sign In */}
+
             <div className="mt-7 border-t border-[#E7E5E0] pt-7 text-center text-[13px] text-[#525252]">
 
               Already have an account?
+
               <span
-  className="ml-1 cursor-pointer font-medium text-[#064E3B]"
-  onClick={() => {
-    window.location.href = "/login";
-  }}
->
-  Sign in
-</span>
+                className="ml-1 cursor-pointer font-medium text-[#064E3B]"
+                onClick={() => {
+                  window.location.href = "/login";
+                }}
+              >
+                Sign in
+              </span>
 
-                  </div>
-
+            </div>
 
             {/* Footer */}
-            <div className="mt-8 text-center text-[11px] text-[#8E8B85]">
 
+            <div className="mt-8 text-center text-[11px] text-[#8E8B85]">
               © 2026 Superblock
               {" · "}
               Privacy
               {" · "}
               Terms
-
             </div>
 
           </div>
@@ -584,11 +709,9 @@ export default function Home() {
         </section>
 
       </div>
-
     </main>
   );
 }
-
 
 /* ============================================================
    FEATURE CARD COMPONENT
