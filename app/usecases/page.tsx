@@ -1,100 +1,107 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
-import { useEffect} from "react";
+import OnboardingHeader from "../components/tempHeader";
 import {
   FaBuilding,
   FaMagic,
   FaChartBar,
   FaCompass,
   FaStar,
+  FaBullhorn,
+  FaHeadphones,
+  FaBullseye,
+  FaShoppingCart,
+  FaCalendarAlt,
+  FaUsers,
+  FaProjectDiagram,
+  FaRobot,
+  FaChalkboardTeacher,
+  FaBell,
 } from "react-icons/fa";
 
-const industries = [
+const useCases = [
   {
-    title: "Ecommerce & D2C",
-    description: "Shopify, WooCommerce, marketplaces.",
-    letter: "$",
-    bg: "bg-[#F0E8FF]",
-    text: "text-[#7C3AED]",
+    title: "Marketing campaigns",
+    description: "Promotions, launches, drips.",
+    icon: <FaBullhorn />,
+    bg: "bg-[#FFF1DC]",
+    text: "text-[#F59E0B]",
+    selectedBorder: "border-[#F59E0B]",
   },
   {
-    title: "SaaS & Software",
-    description: "B2B + B2C software products.",
-    letter: "S",
+    title: "Customer support",
+    description: "Inbox, agents, SLAs.",
+    icon: <FaHeadphones />,
     bg: "bg-[#E5F5FC]",
     text: "text-[#009FE3]",
+    selectedBorder: "border-[#009FE3]",
   },
   {
-    title: "Education & Coaching",
-    description: "Coaches, academies, EdTech.",
-    letter: "E",
-    bg: "bg-[#FFF1DC]",
-    text: "text-[#E98A00]",
-  },
-  {
-    title: "Creator & Community",
-    description: "Solo creators, podcasts, communities.",
-    letter: "C",
+    title: "Lead generation",
+    description: "Capture, qualify, route.",
+    icon: <FaBullseye />,
     bg: "bg-[#FFE9ED]",
     text: "text-[#F43F5E]",
+    selectedBorder: "border-[#F43F5E]",
   },
   {
-    title: "Healthcare & Wellness",
-    description: "Clinics, telehealth, fitness.",
-    letter: "+",
-    bg: "bg-[#DDF7EE]",
-    text: "text-[#10B981]",
+    title: "Ecommerce sales",
+    description: "Carts, catalog, checkout.",
+    icon: <FaShoppingCart />,
+    bg: "bg-[#F0E8FF]",
+    text: "text-[#7C3AED]",
+    selectedBorder: "border-[#8B5CF6]",
   },
   {
-    title: "Real Estate & Property",
-    description: "Brokers, developers, PropTech.",
-    letter: "R",
+    title: "Bookings & appointments",
+    description: "Reminders, no-show recovery.",
+    icon: <FaCalendarAlt />,
     bg: "bg-[#EDEBFF]",
     text: "text-[#6366F1]",
+    selectedBorder: "border-[#6366F1]",
   },
   {
-    title: "Financial Services",
-    description: "FinTech, lending, insurance.",
-    letter: "F",
-    bg: "bg-[#EEF0F2]",
-    text: "text-[#475569]",
+    title: "Community engagement",
+    description: "Members, cohorts, events.",
+    icon: <FaUsers />,
+    bg: "bg-[#DDF7EE]",
+    text: "text-[#10B981]",
+    selectedBorder: "border-[#10B981]",
   },
   {
-    title: "Agency & Reseller",
-    description: "Marketing, ads, BSP resellers.",
-    letter: "A",
+    title: "Automation & workflows",
+    description: "Triggers, sequences.",
+    icon: <FaProjectDiagram />,
+    bg: "bg-[#E5EDFF]",
+    text: "text-[#3B82F6]",
+    selectedBorder: "border-[#3B82F6]",
+  },
+  {
+    title: "AI chatbots",
+    description: "RAG-powered conversations.",
+    icon: <FaRobot />,
+    bg: "bg-[#F8E8FF]",
+    text: "text-[#D946EF]",
+    selectedBorder: "border-[#D946EF]",
+  },
+  {
+    title: "Webinars & coaching",
+    description: "Hosting, reminders, replays.",
+    icon: <FaChalkboardTeacher />,
     bg: "bg-[#FFF0E4]",
     text: "text-[#F97316]",
+    selectedBorder: "border-[#F97316]",
   },
   {
-    title: "Hospitality & F&B",
-    description: "Restaurants, hotels, events.",
-    letter: "H",
-    bg: "bg-[#FDE8F4]",
-    text: "text-[#EC4899]",
-  },
-  {
-    title: "Logistics & Delivery",
-    description: "Shipping, delivery, fleet.",
-    letter: "L",
+    title: "Notifications & alerts",
+    description: "Transactional, OTPs.",
+    icon: <FaBell />,
     bg: "bg-[#E5F7FC]",
     text: "text-[#0891B2]",
-  },
-  {
-    title: "Nonprofit & NGO",
-    description: "Foundations, charities, advocacy.",
-    letter: "N",
-    bg: "bg-[#F8E8FF]",
-    text: "text-[#A855F7]",
-  },
-  {
-    title: "Manufacturing & B2B",
-    description: "Industrial, supply, wholesale.",
-    letter: "M",
-    bg: "bg-[#F0F0EE]",
-    text: "text-[#555555]",
+    selectedBorder: "border-[#0891B2]",
   },
 ];
 
@@ -127,7 +134,16 @@ const steps = [
 ];
 
 export default function OnboardingPage() {
-  const [selectedIndustry, setSelectedIndustry] = useState("");
+const router = useRouter();
+const [selectedUseCases, setSelectedUseCases] = useState<string[]>([
+    "Marketing campaigns",
+    "Customer support",
+    "Ecommerce sales",
+    "Automation & workflows",
+    "Notifications & alerts",
+  ]);
+  
+
   const [userName, setUserName] = useState("");
 
   useEffect(() => {
@@ -157,14 +173,35 @@ export default function OnboardingPage() {
     getUserName();
   }, []);
 
+  const toggleUseCase = (title: string) => {
+  setSelectedUseCases((current) => {
+    // If already selected, allow unselecting
+    if (current.includes(title)) {
+      return current.filter((item) => item !== title);
+    }
+
+    // Don't allow more than 5 selections
+    if (current.length >= 5) {
+      return current;
+    }
+
+    // Otherwise select it
+    return [...current, title];
+  });
+};
+const handleContinue = () => {
+  router.push("/scale");
+};
   return (
+    <>
+          <OnboardingHeader />
     <main className="min-h-screen bg-[#FAFAF8] text-[#111111]">
 
       {/* =====================================================
           HEADER
       ===================================================== */}
 
-      <div className="px-0 pt-[35px]">
+      <div className="px-0 pt-[10px]">
 
         <p className="text-[12px] font-medium tracking-[1.5px] text-[#77736D]">
           WELCOME TO SUPERBLOCK
@@ -203,7 +240,8 @@ export default function OnboardingPage() {
 
             {steps.map((step, index) => {
 
-              const active = index === 0;
+              const completed = index === 0;
+              const active = index === 1;
 
               return (
                 <div
@@ -221,26 +259,31 @@ export default function OnboardingPage() {
                     <div className="absolute left-[22px] top-[48px] h-[28px] w-px bg-[#E2DFDA]" />
                   )}
 
+
                   {/* Icon */}
 
                   <div
                     className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full ${
-                      active
+                      completed
                         ? "bg-[#075B48] text-white"
+                        : active
+                        ? "bg-[#7C3AED] text-white"
                         : "bg-[#F3F2EF] text-[#C5C3BE]"
                     }`}
                   >
                     <span className="text-[12px]">
-                      {step.icon}
+                      {completed ? "✓" : step.icon}
                     </span>
                   </div>
+
 
                   {/* Text */}
 
                   <div>
+
                     <p
                       className={`text-[14px] font-semibold ${
-                        active
+                        active || completed
                           ? "text-[#202020]"
                           : "text-[#B5B2AC]"
                       }`}
@@ -250,13 +293,14 @@ export default function OnboardingPage() {
 
                     <p
                       className={`mt-[1px] text-[12px] ${
-                        active
+                        active || completed
                           ? "text-[#8C8983]"
                           : "text-[#C4C1BC]"
                       }`}
                     >
                       {step.subtitle}
                     </p>
+
                   </div>
 
                 </div>
@@ -274,72 +318,129 @@ export default function OnboardingPage() {
 
         <section className="min-w-0 flex-1">
 
-          <div className="h-full rounded-[16px] border border-[#E1DED9] bg-white px-[45px] py-[48px]">
+          <div className="relative h-full overflow-hidden rounded-[16px] border border-[#E1DED9] bg-white">
 
-            {/* Step */}
+            {/* Purple top border */}
 
-            <p className="text-[12px] font-medium tracking-[1.2px] text-[#98948D]">
-              STEP 1 OF 5
-            </p>
+            <div className="h-[3px] w-full bg-[#7C3AED]" />
 
-            {/* Heading */}
+            <div className="px-[42px] pt-[44px]">
 
-            <h2 className="mt-4 text-[28px] font-semibold leading-[34px] tracking-[-0.8px] text-[#111111]">
-              What kind of business are you running?
-            </h2>
+              {/* Step */}
 
-            <p className="mt-2 max-w-[650px] text-[15px] leading-[24px] text-[#666666]">
-              We'll personalise your workspace copy, suggested templates,
-              and starter automations to match.
-            </p>
+              <p className="text-[12px] font-medium tracking-[1.2px] text-[#98948D]">
+                STEP 2 OF 5
+              </p>
 
 
-            {/* =================================================
-                INDUSTRY GRID
-            ================================================= */}
+              {/* Heading */}
 
-            <div className="mt-7 grid grid-cols-3 gap-[10px]">
+              <h2 className="mt-4 text-[28px] font-semibold leading-[34px] tracking-[-0.8px] text-[#111111]">
+                What will you send on Superblock?
+              </h2>
 
-              {industries.map((industry) => {
 
-                const selected =
-                  selectedIndustry === industry.title;
+              <p className="mt-2 max-w-[700px] text-[15px] leading-[24px] text-[#666666]">
+                Pick everything that applies — we'll surface the right
+                channels, templates, and automations on day one.
+              </p>
 
-                return (
-                  <button
-                    key={industry.title}
-                    type="button"
-                    onClick={() =>
-                      setSelectedIndustry(industry.title)
-                    }
-                    className={`group min-h-[100px] rounded-[10px] border p-4 text-left transition ${
-                      selected
-                        ? "border-[#075B48] bg-[#F7FBF9] shadow-[0_0_0_1px_#075B48]"
-                        : "border-[#E1DED9] bg-white hover:border-[#B8B4AD] hover:bg-[#FCFCFB]"
-                    }`}
-                  >
 
-                    <div className="flex items-center gap-3">
+              {/* =================================================
+                  USE CASE GRID
+              ================================================= */}
+
+              <div className="mt-7 grid grid-cols-2 gap-[9px]">
+
+                {useCases.map((useCase) => {
+
+                  const selected =
+                    selectedUseCases.includes(useCase.title);
+
+                  return (
+                    <button
+                      key={useCase.title}
+                      type="button"
+                      onClick={() =>
+                        toggleUseCase(useCase.title)
+                      }
+                      className={`relative flex min-h-[77px] items-center rounded-[10px] border p-3.5 text-left transition ${
+                        selected
+                          ? `${useCase.selectedBorder} shadow-[0_0_0_1px_rgba(0,0,0,0.02)]`
+                          : "border-[#E1DED9] bg-white hover:border-[#B8B4AD]"
+                      }`}
+                    >
+
+                      {/* Icon */}
 
                       <div
-                        className={`flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[7px] text-[16px] font-medium ${industry.bg} ${industry.text}`}
+                        className={`flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[7px] text-[16px] ${useCase.bg} ${useCase.text}`}
                       >
-                        {industry.letter}
+                        {useCase.icon}
                       </div>
 
-                      <p className="text-[15px] font-semibold text-[#161616]">
-                        {industry.title}
-                      </p>
 
-                    </div>
+                      {/* Text */}
 
-                    <p className="mt-3 text-[13px] leading-[18px] text-[#99958F]">
-                      {industry.description}
-                    </p>
+                      <div className="ml-3 min-w-0">
 
-                  </button>
-                );
-              })}
+                        <p className="text-[15px] font-semibold text-[#161616]">
+                          {useCase.title}
+                        </p>
+
+                        <p className="mt-[2px] text-[12.5px] text-[#99958F]">
+                          {useCase.description}
+                        </p>
+
+                      </div>
+
+
+                      {/* Selected check */}
+
+                      {selected && (
+                        <div
+                          className={`absolute right-3.5 top-3.5 flex h-[19px] w-[19px] items-center justify-center rounded-full ${useCase.bg} ${useCase.text}`}
+                        >
+                          <span className="text-[11px] font-bold">
+                            ✓
+                          </span>
+                        </div>
+                      )}
+
+                    </button>
+                  );
+                })}
+
+              </div>
+
+
+              {/* =================================================
+                  BOTTOM BUTTONS
+              ================================================= */}
+
+              <div className="relative mt-[42px] flex items-center justify-between border-t border-[#E2DFDA] pt-[22px]">
+
+                <button
+                  type="button"
+                  className="rounded-[8px] border border-[#E1DED9] bg-white px-4 py-2 text-[14px] text-[#202020]"
+                >
+                  ← Back
+                </button>
+
+
+                <span className="absolute left-1/2 -translate-x-1/2 text-[12px] text-[#99958F]">
+                  Step 2 of 5
+                </span>
+
+
+                <button
+  type="button"
+  onClick={handleContinue}
+  className="rounded-[8px] bg-[#075B48] px-5 py-2.5 text-[14px] font-semibold text-white transition hover:bg-[#064D3E]"
+>
+  Continue →
+</button>
+              </div>
 
             </div>
 
@@ -355,6 +456,7 @@ export default function OnboardingPage() {
         <aside className="w-[425px] shrink-0">
 
           <div className="rounded-[16px] border border-[#E1DED9] bg-white p-5">
+
 
             {/* Preview heading */}
 
@@ -388,6 +490,7 @@ export default function OnboardingPage() {
 
             <div className="mt-5 overflow-hidden rounded-[10px] border border-[#DDD9D3]">
 
+
               {/* Browser bar */}
 
               <div className="flex h-[34px] items-center justify-between border-b border-[#DDD9D3] px-3">
@@ -401,7 +504,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <span className="text-[9px] text-[#88837D]">
-                  Superblock for business
+                  Superblock for ecommerce
                 </span>
 
                 <span className="h-[7px] w-[7px] rounded-full bg-[#12B886]" />
@@ -412,6 +515,7 @@ export default function OnboardingPage() {
               {/* Dashboard */}
 
               <div className="flex min-h-[235px]">
+
 
                 {/* Sidebar */}
 
@@ -449,23 +553,23 @@ export default function OnboardingPage() {
                 <div className="flex-1 p-3">
 
                   <h3 className="text-[12px] font-semibold">
-                    Welcome back, Sana
+                    Welcome back, {userName || "Sana"}
                   </h3>
 
                   <p className="mt-1 text-[9px] text-[#99958F]">
-                    Pick an industry to begin
+                    Superblock for ecommerce
                   </p>
 
 
-                  {/* Contacts */}
+                  {/* Customers */}
 
                   <div className="mt-3 rounded-[7px] border border-[#E2DFDA] p-2.5">
 
                     <p className="text-[8px] font-medium text-[#99958F]">
-                      CONTACTS REACHED THIS WEEK
+                      CUSTOMERS REACHED THIS WEEK
                     </p>
 
-                    <div className="mt-1 flex items-center justify-between">
+                    <div className="mt-1 flex items-center gap-2">
 
                       <span className="text-[17px] font-semibold">
                         1,284
@@ -477,7 +581,8 @@ export default function OnboardingPage() {
 
                     </div>
 
-                    {/* chart */}
+
+                    {/* Chart */}
 
                     <div className="mt-3 flex h-[22px] items-end gap-1">
 
@@ -502,7 +607,7 @@ export default function OnboardingPage() {
                   </div>
 
 
-                  {/* Suggested message */}
+                  {/* Suggested */}
 
                   <div className="mt-3 rounded-[7px] border border-[#BBD6CD] bg-[#EDF6F2] p-2.5">
 
@@ -515,11 +620,11 @@ export default function OnboardingPage() {
                       <div>
 
                         <p className="text-[9px] font-semibold">
-                          Suggested: Welcome message
+                          Suggested: Abandoned-cart reco...
                         </p>
 
                         <p className="mt-0.5 text-[7px] text-[#77736D]">
-                          Tap to scaffold a flow for contacts.
+                          Tap to scaffold a flow for customers.
                         </p>
 
                       </div>
@@ -536,6 +641,35 @@ export default function OnboardingPage() {
 
 
             {/* =================================================
+                ENGAGEMENT TOOLS
+            ================================================= */}
+
+            <div className="mt-4 rounded-[8px] border border-[#E1DED9] p-3">
+
+              <p className="text-[11px] font-semibold tracking-[0.5px] text-[#66615B]">
+                ✣ &nbsp; ENGAGEMENT TOOLS UNLOCKED
+              </p>
+
+              <div className="mt-2 space-y-1.5">
+
+                <p className="text-[11px] text-[#626262]">
+                  ✓ Automation studio
+                </p>
+
+                <p className="text-[11px] text-[#626262]">
+                  ✓ Offers
+                </p>
+
+                <p className="text-[11px] text-[#626262]">
+                  ✓ Onboarding sequences
+                </p>
+
+              </div>
+
+            </div>
+
+
+            {/* =================================================
                 PREVIEW DETAILS
             ================================================= */}
 
@@ -543,27 +677,27 @@ export default function OnboardingPage() {
 
               <PreviewItem
                 label="INDUSTRY"
-                value={selectedIndustry || "—"}
+                value="Ecommerce & D2C"
               />
 
               <PreviewItem
                 label="TONE"
-                value="Superblock for business"
+                value="Superblock for ecommerce"
               />
 
               <PreviewItem
                 label="CONTACTS CALLED"
-                value="Contacts"
+                value="Customers"
               />
 
               <PreviewItem
                 label="AUDIENCE AS"
-                value="Audience"
+                value="Segment"
               />
 
               <PreviewItem
                 label="USE CASES"
-                value="—"
+                value={`${selectedUseCases.length} picked`}
               />
 
               <PreviewItem
@@ -589,6 +723,7 @@ export default function OnboardingPage() {
       </div>
 
     </main>
+    </>
   );
 }
 
@@ -606,6 +741,7 @@ function PreviewItem({
 }) {
   return (
     <div>
+
       <p className="text-[10px] font-medium tracking-[0.7px] text-[#99958F]">
         {label}
       </p>
@@ -613,6 +749,7 @@ function PreviewItem({
       <p className="mt-1 text-[13px] font-medium text-[#202020]">
         {value}
       </p>
+
     </div>
   );
 }
