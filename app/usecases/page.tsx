@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import OnboardingHeader from "../components/tempHeader";
+import OnboardingNavigation from "../components/comonboarding/page";
+
 import {
   FaBuilding,
   FaMagic,
@@ -20,6 +21,10 @@ import {
   FaChalkboardTeacher,
   FaBell,
 } from "react-icons/fa";
+
+/* ============================================================
+   USE CASES
+============================================================ */
 
 const useCases = [
   {
@@ -104,6 +109,10 @@ const useCases = [
   },
 ];
 
+/* ============================================================
+   ONBOARDING STEPS
+============================================================ */
+
 const steps = [
   {
     title: "Industry",
@@ -132,597 +141,601 @@ const steps = [
   },
 ];
 
+/* ============================================================
+   PAGE
+============================================================ */
+
 export default function OnboardingPage() {
-const router = useRouter();
-const [selectedUseCases, setSelectedUseCases] = useState<string[]>([
+  /* ==========================================================
+     SELECTED USE CASES
+  ========================================================== */
+
+  const [selectedUseCases, setSelectedUseCases] = useState<string[]>([
     "Marketing campaigns",
     "Customer support",
     "Ecommerce sales",
     "Automation & workflows",
     "Notifications & alerts",
   ]);
-  
 
   const [userName, setUserName] = useState("");
 
+  /* ==========================================================
+     LOAD USER + PREVIOUS USE CASES
+
+     NO SUPABASE
+     NO FETCH
+     NO LAMBDA URL
+  ========================================================== */
+
   useEffect(() => {
-  const savedUser = localStorage.getItem("signup_user");
+    /* ---------------- USER ---------------- */
 
-  if (!savedUser) return;
+    const savedUser = localStorage.getItem("signup_user");
 
-  try {
-    const user = JSON.parse(savedUser);
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
 
-    if (user.full_name) {
-      setUserName(user.full_name);
+        if (user.full_name) {
+          setUserName(user.full_name);
+        }
+      } catch (error) {
+        console.error("Failed to read signup user:", error);
+      }
     }
-  } catch (error) {
-    console.error("Failed to read signup user:", error);
-  }
-}, []);
+
+    /* ---------------- USE CASES ---------------- */
+
+    const savedUseCases = localStorage.getItem(
+      "onboarding_use_cases"
+    );
+
+    if (savedUseCases) {
+      try {
+        const data = JSON.parse(savedUseCases);
+
+        if (
+          Array.isArray(data.use_cases) &&
+          data.use_cases.length > 0
+        ) {
+          setSelectedUseCases(data.use_cases);
+        }
+      } catch (error) {
+        console.error(
+          "Failed to read onboarding use cases:",
+          error
+        );
+      }
+    }
+  }, []);
+
+  /* ==========================================================
+     TOGGLE USE CASE
+
+     MAXIMUM 5
+  ========================================================== */
 
   const toggleUseCase = (title: string) => {
-  setSelectedUseCases((current) => {
-    // If already selected, allow unselecting
-    if (current.includes(title)) {
-      return current.filter((item) => item !== title);
-    }
+    setSelectedUseCases((current) => {
+      /* Remove if already selected */
 
-    // Don't allow more than 5 selections
-    if (current.length >= 5) {
-      return current;
-    }
+      if (current.includes(title)) {
+        return current.filter((item) => item !== title);
+      }
 
-    // Otherwise select it
-    return [...current, title];
-  });
-};
-const handleContinue = () => {
-  localStorage.setItem(
-    "onboarding_use_cases",
-    JSON.stringify({
-      use_cases: selectedUseCases,
-    })
-  );
+      /* Maximum 5 */
 
-  router.push("/scale");
-};
+      if (current.length >= 5) {
+        return current;
+      }
+
+      /* Add */
+
+      return [...current, title];
+    });
+  };
+
   return (
     <>
-          <OnboardingHeader />
-    <main className="min-h-screen bg-[#FAFAF8] text-[#111111]">
+      <OnboardingHeader />
 
-      {/* =====================================================
-          HEADER
-      ===================================================== */}
+      <main className="min-h-screen bg-[#FAFAF8] text-[#111111]">
 
-      <div className="px-0 pt-[10px]">
+        {/* ==================================================
+            HEADER
+        ================================================== */}
 
-        <p className="text-[12px] font-medium tracking-[1.5px] text-[#77736D]">
-          WELCOME TO SUPERBLOCK
-        </p>
+        <div className="px-0 pt-[10px]">
 
-        <h1 className="mt-4 text-[40px] font-semibold leading-[46px] tracking-[-1.2px]">
-          Hey {userName || "there"},{" "}
-          <span className="text-[#3D4650]">
-            let's shape your workspace.
-          </span>
-        </h1>
+          <p className="text-[12px] font-medium tracking-[1.5px] text-[#77736D]">
+            WELCOME TO SUPERBLOCK
+          </p>
 
-        <p className="mt-3 max-w-[800px] text-[15px] leading-[24px] text-[#555555]">
-          Five quick questions — about a minute. We'll use them to pick
-          channel defaults, suggest templates, and tune the copy across
-          the app so it speaks your business's language from day one.
-        </p>
+          <h1 className="mt-4 text-[40px] font-semibold leading-[46px] tracking-[-1.2px]">
+            Hey {userName || "there"},{" "}
+            <span className="text-[#3D4650]">
+              let's shape your workspace.
+            </span>
+          </h1>
 
-      </div>
+          <p className="mt-3 max-w-[800px] text-[15px] leading-[24px] text-[#555555]">
+            Five quick questions — about a minute. We'll use them
+            to pick channel defaults, suggest templates, and tune
+            the copy across the app so it speaks your business's
+            language from day one.
+          </p>
 
+        </div>
 
-      {/* =====================================================
-          MAIN CONTENT
-      ===================================================== */}
+        {/* ==================================================
+            MAIN CONTENT
+        ================================================== */}
 
-      <div className="mt-7 flex min-h-[620px] gap-[30px]">
+        <div className="mt-7 flex min-h-[620px] gap-[30px]">
 
+          {/* ==================================================
+              LEFT — STEPS
+          ================================================== */}
 
-        {/* =====================================================
-            LEFT STEPS
-        ===================================================== */}
+          <aside className="w-[224px] shrink-0">
 
-        <aside className="w-[224px] shrink-0">
+            <div className="space-y-1">
 
-          <div className="space-y-1">
+              {steps.map((step, index) => {
 
-            {steps.map((step, index) => {
+                const completed = index === 0;
+                const active = index === 1;
 
-              const completed = index === 0;
-              const active = index === 1;
-
-              return (
-                <div
-                  key={step.title}
-                  className={`relative flex h-[60px] items-center gap-3 rounded-[10px] px-3 ${
-                    active
-                      ? "border border-[#E2DFDA] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
-                      : "bg-transparent"
-                  }`}
-                >
-
-                  {/* Vertical line */}
-
-                  {index < steps.length - 1 && (
-                    <div className="absolute left-[22px] top-[48px] h-[28px] w-px bg-[#E2DFDA]" />
-                  )}
-
-
-                  {/* Icon */}
-
+                return (
                   <div
-                    className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full ${
-                      completed
-                        ? "bg-[#075B48] text-white"
-                        : active
-                        ? "bg-[#7C3AED] text-white"
-                        : "bg-[#F3F2EF] text-[#C5C3BE]"
+                    key={step.title}
+                    className={`relative flex h-[60px] items-center gap-3 rounded-[10px] px-3 ${
+                      active
+                        ? "border border-[#E2DFDA] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+                        : "bg-transparent"
                     }`}
                   >
-                    <span className="text-[12px]">
-                      {completed ? "✓" : step.icon}
-                    </span>
-                  </div>
 
+                    {/* Vertical line */}
 
-                  {/* Text */}
+                    {index < steps.length - 1 && (
+                      <div className="absolute left-[22px] top-[48px] h-[28px] w-px bg-[#E2DFDA]" />
+                    )}
 
-                  <div>
+                    {/* Icon */}
 
-                    <p
-                      className={`text-[14px] font-semibold ${
-                        active || completed
-                          ? "text-[#202020]"
-                          : "text-[#B5B2AC]"
+                    <div
+                      className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full ${
+                        completed
+                          ? "bg-[#075B48] text-white"
+                          : active
+                          ? "bg-[#7C3AED] text-white"
+                          : "bg-[#F3F2EF] text-[#C5C3BE]"
                       }`}
                     >
-                      {step.title}
-                    </p>
+                      <span className="text-[12px]">
+                        {completed ? "✓" : step.icon}
+                      </span>
+                    </div>
 
-                    <p
-                      className={`mt-[1px] text-[12px] ${
-                        active || completed
-                          ? "text-[#8C8983]"
-                          : "text-[#C4C1BC]"
-                      }`}
-                    >
-                      {step.subtitle}
-                    </p>
+                    {/* Text */}
 
-                  </div>
+                    <div>
 
-                </div>
-              );
-            })}
-
-          </div>
-
-        </aside>
-
-
-        {/* =====================================================
-            CENTER
-        ===================================================== */}
-
-        <section className="min-w-0 flex-1">
-
-          <div className="relative h-full overflow-hidden rounded-[16px] border border-[#E1DED9] bg-white">
-
-            {/* Purple top border */}
-
-            <div className="h-[3px] w-full bg-[#7C3AED]" />
-
-            <div className="px-[42px] pt-[44px]">
-
-              {/* Step */}
-
-              <p className="text-[12px] font-medium tracking-[1.2px] text-[#98948D]">
-                STEP 2 OF 5
-              </p>
-
-
-              {/* Heading */}
-
-              <h2 className="mt-4 text-[28px] font-semibold leading-[34px] tracking-[-0.8px] text-[#111111]">
-                What will you send on Superblock?
-              </h2>
-
-
-              <p className="mt-2 max-w-[700px] text-[15px] leading-[24px] text-[#666666]">
-                Pick everything that applies — we'll surface the right
-                channels, templates, and automations on day one.
-              </p>
-
-
-              {/* =================================================
-                  USE CASE GRID
-              ================================================= */}
-
-              <div className="mt-7 grid grid-cols-2 gap-[9px]">
-
-                {useCases.map((useCase) => {
-
-                  const selected =
-                    selectedUseCases.includes(useCase.title);
-
-                  return (
-                    <button
-                      key={useCase.title}
-                      type="button"
-                      onClick={() =>
-                        toggleUseCase(useCase.title)
-                      }
-                      className={`relative flex min-h-[77px] items-center rounded-[10px] border p-3.5 text-left transition ${
-                        selected
-                          ? `${useCase.selectedBorder} shadow-[0_0_0_1px_rgba(0,0,0,0.02)]`
-                          : "border-[#E1DED9] bg-white hover:border-[#B8B4AD]"
-                      }`}
-                    >
-
-                      {/* Icon */}
-
-                      <div
-                        className={`flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[7px] text-[16px] ${useCase.bg} ${useCase.text}`}
+                      <p
+                        className={`text-[14px] font-semibold ${
+                          active || completed
+                            ? "text-[#202020]"
+                            : "text-[#B5B2AC]"
+                        }`}
                       >
-                        {useCase.icon}
-                      </div>
+                        {step.title}
+                      </p>
 
+                      <p
+                        className={`mt-[1px] text-[12px] ${
+                          active || completed
+                            ? "text-[#8C8983]"
+                            : "text-[#C4C1BC]"
+                        }`}
+                      >
+                        {step.subtitle}
+                      </p>
 
-                      {/* Text */}
+                    </div>
 
-                      <div className="ml-3 min-w-0">
+                  </div>
+                );
+              })}
 
-                        <p className="text-[15px] font-semibold text-[#161616]">
-                          {useCase.title}
-                        </p>
+            </div>
 
-                        <p className="mt-[2px] text-[12.5px] text-[#99958F]">
-                          {useCase.description}
-                        </p>
+          </aside>
 
-                      </div>
+          {/* ==================================================
+              CENTER
+          ================================================== */}
 
+          <section className="min-w-0 flex-1">
 
-                      {/* Selected check */}
+            <div className="relative h-full overflow-hidden rounded-[16px] border border-[#E1DED9] bg-white">
 
-                      {selected && (
+              {/* Purple top border */}
+
+              <div className="h-[3px] w-full bg-[#7C3AED]" />
+
+              <div className="px-[42px] pt-[44px]">
+
+                {/* Step */}
+
+                <p className="text-[12px] font-medium tracking-[1.2px] text-[#98948D]">
+                  STEP 2 OF 5
+                </p>
+
+                {/* Heading */}
+
+                <h2 className="mt-4 text-[28px] font-semibold leading-[34px] tracking-[-0.8px] text-[#111111]">
+                  What will you send on Superblock?
+                </h2>
+
+                <p className="mt-2 max-w-[700px] text-[15px] leading-[24px] text-[#666666]">
+                  Pick everything that applies — we'll surface the
+                  right channels, templates, and automations on day
+                  one.
+                </p>
+
+                {/* =================================================
+                    USE CASE GRID
+                ================================================= */}
+
+                <div className="mt-7 grid grid-cols-2 gap-[9px]">
+
+                  {useCases.map((useCase) => {
+
+                    const selected =
+                      selectedUseCases.includes(useCase.title);
+
+                    return (
+                      <button
+                        key={useCase.title}
+                        type="button"
+                        onClick={() =>
+                          toggleUseCase(useCase.title)
+                        }
+                        className={`relative flex min-h-[77px] items-center rounded-[10px] border p-3.5 text-left transition ${
+                          selected
+                            ? `${useCase.selectedBorder} shadow-[0_0_0_1px_rgba(0,0,0,0.02)]`
+                            : "border-[#E1DED9] bg-white hover:border-[#B8B4AD]"
+                        }`}
+                      >
+
+                        {/* Icon */}
+
                         <div
-                          className={`absolute right-3.5 top-3.5 flex h-[19px] w-[19px] items-center justify-center rounded-full ${useCase.bg} ${useCase.text}`}
+                          className={`flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[7px] text-[16px] ${useCase.bg} ${useCase.text}`}
                         >
-                          <span className="text-[11px] font-bold">
-                            ✓
-                          </span>
+                          {useCase.icon}
                         </div>
-                      )}
 
-                    </button>
-                  );
-                })}
+                        {/* Text */}
 
-              </div>
+                        <div className="ml-3 min-w-0">
 
+                          <p className="text-[15px] font-semibold text-[#161616]">
+                            {useCase.title}
+                          </p>
 
-              {/* =================================================
-                  BOTTOM BUTTONS
-              ================================================= */}
+                          <p className="mt-[2px] text-[12.5px] text-[#99958F]">
+                            {useCase.description}
+                          </p>
 
-              <div className="relative mt-[42px] flex items-center justify-between border-t border-[#E2DFDA] pt-[22px]">
+                        </div>
 
-                <button
-  type="button"
-  onClick={() => router.push("/onboardingentry")}
-  className="rounded-[8px] border border-[#E1DED9] bg-white px-4 py-2 text-[14px] text-[#202020]"
->
-  ← Back
-</button>
+                        {/* Selected check */}
 
+                        {selected && (
+                          <div
+                            className={`absolute right-3.5 top-3.5 flex h-[19px] w-[19px] items-center justify-center rounded-full ${useCase.bg} ${useCase.text}`}
+                          >
+                            <span className="text-[11px] font-bold">
+                              ✓
+                            </span>
+                          </div>
+                        )}
 
-                <span className="absolute left-1/2 -translate-x-1/2 text-[12px] text-[#99958F]">
-                  Step 2 of 5
-                </span>
+                      </button>
+                    );
+                  })}
 
+                </div>
 
-                <button
-  type="button"
-  onClick={handleContinue}
-  className="rounded-[8px] bg-[#075B48] px-5 py-2.5 text-[14px] font-semibold text-white transition hover:bg-[#064D3E]"
->
-  Continue →
-</button>
+                {/* =================================================
+                    REUSABLE BOTTOM NAVIGATION
+                ================================================= */}
+
+                <OnboardingNavigation
+                  currentStep={2}
+                  nextPath="/onboarding/scale"
+                  backPath="/onboarding"
+                  onContinue={() => {
+                    localStorage.setItem(
+                      "onboarding_use_cases",
+                      JSON.stringify({
+                        use_cases: selectedUseCases,
+                      })
+                    );
+                  }}
+                />
+
               </div>
 
             </div>
 
-          </div>
+          </section>
 
-        </section>
+          {/* ==================================================
+              RIGHT — LIVE PREVIEW
+          ================================================== */}
 
+          <aside className="w-[425px] shrink-0">
 
-        {/* =====================================================
-            RIGHT LIVE PREVIEW
-        ===================================================== */}
+            <div className="rounded-[16px] border border-[#E1DED9] bg-white p-5">
 
-        <aside className="w-[425px] shrink-0">
+              {/* Preview heading */}
 
-          <div className="rounded-[16px] border border-[#E1DED9] bg-white p-5">
+              <div className="flex items-center justify-between">
 
+                <p className="text-[12px] font-semibold tracking-[1.1px] text-[#99958F]">
+                  LIVE PREVIEW
+                </p>
 
-            {/* Preview heading */}
+                <div className="flex items-center gap-1.5 rounded-full bg-[#E9F2EF] px-2.5 py-1 text-[10px] font-medium text-[#176653]">
 
-            <div className="flex items-center justify-between">
+                  <span className="h-[5px] w-[5px] rounded-full bg-[#087F63]" />
 
-              <p className="text-[12px] font-semibold tracking-[1.1px] text-[#99958F]">
-                LIVE PREVIEW
+                  updates as you answer
+
+                </div>
+
+              </div>
+
+              <p className="mt-2 text-[13px] leading-[20px] text-[#99958F]">
+                Your workspace stays calm and neutral — the colours
+                here on onboarding are just guideposts. Only the
+                wording and which tools unlock change per business.
               </p>
 
-              <div className="flex items-center gap-1.5 rounded-full bg-[#E9F2EF] px-2.5 py-1 text-[10px] font-medium text-[#176653]">
+              {/* =================================================
+                  MINI DASHBOARD
+              ================================================= */}
 
-                <span className="h-[5px] w-[5px] rounded-full bg-[#087F63]" />
+              <div className="mt-5 overflow-hidden rounded-[10px] border border-[#DDD9D3]">
 
-                updates as you answer
+                {/* Browser bar */}
 
-              </div>
+                <div className="flex h-[34px] items-center justify-between border-b border-[#DDD9D3] px-3">
 
-            </div>
-
-
-            <p className="mt-2 text-[13px] leading-[20px] text-[#99958F]">
-              Your workspace stays calm and neutral — the colours here
-              on onboarding are just guideposts. Only the wording and
-              which tools unlock change per business.
-            </p>
-
-
-            {/* =================================================
-                MINI DASHBOARD
-            ================================================= */}
-
-            <div className="mt-5 overflow-hidden rounded-[10px] border border-[#DDD9D3]">
-
-
-              {/* Browser bar */}
-
-              <div className="flex h-[34px] items-center justify-between border-b border-[#DDD9D3] px-3">
-
-                <div className="flex gap-1.5">
-
-                  <span className="h-[7px] w-[7px] rounded-full bg-[#FF6257]" />
-                  <span className="h-[7px] w-[7px] rounded-full bg-[#FFBD2E]" />
-                  <span className="h-[7px] w-[7px] rounded-full bg-[#28C840]" />
-
-                </div>
-
-                <span className="text-[9px] text-[#88837D]">
-                  Superblock for ecommerce
-                </span>
-
-                <span className="h-[7px] w-[7px] rounded-full bg-[#12B886]" />
-
-              </div>
-
-
-              {/* Dashboard */}
-
-              <div className="flex min-h-[235px]">
-
-
-                {/* Sidebar */}
-
-                <div className="w-[95px] border-r border-[#E2DFDA] p-2">
-
-                  <div className="rounded-[5px] bg-[#E9F1EF] px-2 py-1.5 text-[9px] font-medium text-[#176653]">
-                    ⌂ &nbsp; Home
+                  <div className="flex gap-1.5">
+                    <span className="h-[7px] w-[7px] rounded-full bg-[#FF6257]" />
+                    <span className="h-[7px] w-[7px] rounded-full bg-[#FFBD2E]" />
+                    <span className="h-[7px] w-[7px] rounded-full bg-[#28C840]" />
                   </div>
 
-                  <div className="mt-1 px-2 py-1.5 text-[9px] text-[#77736D]">
-                    ♢ &nbsp; Inbox
-                  </div>
-
-                  <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
-                    ◇ &nbsp; Send
-                  </div>
-
-                  <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
-                    ♙ &nbsp; Contacts
-                  </div>
-
-                  <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
-                    ⚒ &nbsp; Build
-                  </div>
-
-                  <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
-                    ◫ &nbsp; Insights
-                  </div>
-
-                </div>
-
-
-                {/* Dashboard content */}
-
-                <div className="flex-1 p-3">
-
-                  <h3 className="text-[12px] font-semibold">
-                    Welcome back, {userName || "Sana"}
-                  </h3>
-
-                  <p className="mt-1 text-[9px] text-[#99958F]">
+                  <span className="text-[9px] text-[#88837D]">
                     Superblock for ecommerce
+                  </span>
+
+                  <span className="h-[7px] w-[7px] rounded-full bg-[#12B886]" />
+
+                </div>
+
+                {/* Dashboard */}
+
+                <div className="flex min-h-[235px]">
+
+                  {/* Sidebar */}
+
+                  <div className="w-[95px] border-r border-[#E2DFDA] p-2">
+
+                    <div className="rounded-[5px] bg-[#E9F1EF] px-2 py-1.5 text-[9px] font-medium text-[#176653]">
+                      ⌂ &nbsp; Home
+                    </div>
+
+                    <div className="mt-1 px-2 py-1.5 text-[9px] text-[#77736D]">
+                      ♢ &nbsp; Inbox
+                    </div>
+
+                    <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
+                      ◇ &nbsp; Send
+                    </div>
+
+                    <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
+                      ♙ &nbsp; Contacts
+                    </div>
+
+                    <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
+                      ⚒ &nbsp; Build
+                    </div>
+
+                    <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
+                      ◫ &nbsp; Insights
+                    </div>
+
+                  </div>
+
+                  {/* Dashboard content */}
+
+                  <div className="flex-1 p-3">
+
+                    <h3 className="text-[12px] font-semibold">
+                      Welcome back, {userName || "Sana"}
+                    </h3>
+
+                    <p className="mt-1 text-[9px] text-[#99958F]">
+                      Superblock for ecommerce
+                    </p>
+
+                    {/* Customers */}
+
+                    <div className="mt-3 rounded-[7px] border border-[#E2DFDA] p-2.5">
+
+                      <p className="text-[8px] font-medium text-[#99958F]">
+                        CUSTOMERS REACHED THIS WEEK
+                      </p>
+
+                      <div className="mt-1 flex items-center gap-2">
+
+                        <span className="text-[17px] font-semibold">
+                          1,284
+                        </span>
+
+                        <span className="rounded bg-[#E5F5ED] px-1 text-[7px] text-[#16805E]">
+                          +12%
+                        </span>
+
+                      </div>
+
+                      {/* Chart */}
+
+                      <div className="mt-3 flex h-[22px] items-end gap-1">
+
+                        {[8, 12, 9, 15, 10, 16, 13, 19, 14].map(
+                          (height, index) => (
+                            <div
+                              key={index}
+                              className={`flex-1 rounded-[2px] ${
+                                index === 8
+                                  ? "bg-[#075B48]"
+                                  : "bg-[#D8D8D5]"
+                              }`}
+                              style={{
+                                height: `${height}px`,
+                              }}
+                            />
+                          )
+                        )}
+
+                      </div>
+
+                    </div>
+
+                    {/* Suggested */}
+
+                    <div className="mt-3 rounded-[7px] border border-[#BBD6CD] bg-[#EDF6F2] p-2.5">
+
+                      <div className="flex items-center gap-2">
+
+                        <div className="flex h-6 w-6 items-center justify-center rounded-[5px] bg-[#075B48] text-[10px] text-white">
+                          ✦
+                        </div>
+
+                        <div>
+
+                          <p className="text-[9px] font-semibold">
+                            Suggested: Abandoned-cart reco...
+                          </p>
+
+                          <p className="mt-0.5 text-[7px] text-[#77736D]">
+                            Tap to scaffold a flow for customers.
+                          </p>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* =================================================
+                  ENGAGEMENT TOOLS
+              ================================================= */}
+
+              <div className="mt-4 rounded-[8px] border border-[#E1DED9] p-3">
+
+                <p className="text-[11px] font-semibold tracking-[0.5px] text-[#66615B]">
+                  ✣ &nbsp; ENGAGEMENT TOOLS UNLOCKED
+                </p>
+
+                <div className="mt-2 space-y-1.5">
+
+                  <p className="text-[11px] text-[#626262]">
+                    ✓ Automation studio
                   </p>
 
+                  <p className="text-[11px] text-[#626262]">
+                    ✓ Offers
+                  </p>
 
-                  {/* Customers */}
-
-                  <div className="mt-3 rounded-[7px] border border-[#E2DFDA] p-2.5">
-
-                    <p className="text-[8px] font-medium text-[#99958F]">
-                      CUSTOMERS REACHED THIS WEEK
-                    </p>
-
-                    <div className="mt-1 flex items-center gap-2">
-
-                      <span className="text-[17px] font-semibold">
-                        1,284
-                      </span>
-
-                      <span className="rounded bg-[#E5F5ED] px-1 text-[7px] text-[#16805E]">
-                        +12%
-                      </span>
-
-                    </div>
-
-
-                    {/* Chart */}
-
-                    <div className="mt-3 flex h-[22px] items-end gap-1">
-
-                      {[8, 12, 9, 15, 10, 16, 13, 19, 14].map(
-                        (height, index) => (
-                          <div
-                            key={index}
-                            className={`flex-1 rounded-[2px] ${
-                              index === 8
-                                ? "bg-[#075B48]"
-                                : "bg-[#D8D8D5]"
-                            }`}
-                            style={{
-                              height: `${height}px`,
-                            }}
-                          />
-                        )
-                      )}
-
-                    </div>
-
-                  </div>
-
-
-                  {/* Suggested */}
-
-                  <div className="mt-3 rounded-[7px] border border-[#BBD6CD] bg-[#EDF6F2] p-2.5">
-
-                    <div className="flex items-center gap-2">
-
-                      <div className="flex h-6 w-6 items-center justify-center rounded-[5px] bg-[#075B48] text-[10px] text-white">
-                        ✦
-                      </div>
-
-                      <div>
-
-                        <p className="text-[9px] font-semibold">
-                          Suggested: Abandoned-cart reco...
-                        </p>
-
-                        <p className="mt-0.5 text-[7px] text-[#77736D]">
-                          Tap to scaffold a flow for customers.
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                  </div>
+                  <p className="text-[11px] text-[#626262]">
+                    ✓ Onboarding sequences
+                  </p>
 
                 </div>
 
               </div>
 
-            </div>
+              {/* =================================================
+                  PREVIEW DETAILS
+              ================================================= */}
 
+              <div className="mt-4 grid grid-cols-2 gap-y-4">
 
-            {/* =================================================
-                ENGAGEMENT TOOLS
-            ================================================= */}
+                <PreviewItem
+                  label="INDUSTRY"
+                  value="Ecommerce & D2C"
+                />
 
-            <div className="mt-4 rounded-[8px] border border-[#E1DED9] p-3">
+                <PreviewItem
+                  label="TONE"
+                  value="Superblock for ecommerce"
+                />
 
-              <p className="text-[11px] font-semibold tracking-[0.5px] text-[#66615B]">
-                ✣ &nbsp; ENGAGEMENT TOOLS UNLOCKED
-              </p>
+                <PreviewItem
+                  label="CONTACTS CALLED"
+                  value="Customers"
+                />
 
-              <div className="mt-2 space-y-1.5">
+                <PreviewItem
+                  label="AUDIENCE AS"
+                  value="Segment"
+                />
 
-                <p className="text-[11px] text-[#626262]">
-                  ✓ Automation studio
-                </p>
+                <PreviewItem
+                  label="USE CASES"
+                  value={`${selectedUseCases.length} picked`}
+                />
 
-                <p className="text-[11px] text-[#626262]">
-                  ✓ Offers
-                </p>
-
-                <p className="text-[11px] text-[#626262]">
-                  ✓ Onboarding sequences
-                </p>
+                <PreviewItem
+                  label="TEAM"
+                  value="—"
+                />
 
               </div>
 
-            </div>
-
-
-            {/* =================================================
-                PREVIEW DETAILS
-            ================================================= */}
-
-            <div className="mt-4 grid grid-cols-2 gap-y-4">
-
-              <PreviewItem
-                label="INDUSTRY"
-                value="Ecommerce & D2C"
-              />
-
-              <PreviewItem
-                label="TONE"
-                value="Superblock for ecommerce"
-              />
-
-              <PreviewItem
-                label="CONTACTS CALLED"
-                value="Customers"
-              />
-
-              <PreviewItem
-                label="AUDIENCE AS"
-                value="Segment"
-              />
-
-              <PreviewItem
-                label="USE CASES"
-                value={`${selectedUseCases.length} picked`}
-              />
-
-              <PreviewItem
-                label="TEAM"
-                value="—"
-              />
+              <p className="mt-5 text-[11px] text-[#99958F]">
+                Everything is editable in{" "}
+                <span className="font-semibold text-[#55514B]">
+                  Settings → Preferences
+                </span>{" "}
+                any time.
+              </p>
 
             </div>
 
+          </aside>
 
-            <p className="mt-5 text-[11px] text-[#99958F]">
-              Everything is editable in{" "}
-              <span className="font-semibold text-[#55514B]">
-                Settings → Preferences
-              </span>{" "}
-              any time.
-            </p>
+        </div>
 
-          </div>
-
-        </aside>
-
-      </div>
-
-    </main>
+      </main>
     </>
   );
 }
-
 
 /* ============================================================
    PREVIEW ITEM

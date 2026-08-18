@@ -1,78 +1,58 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import OnboardingHeader from "../components/tempHeader";
+import OnboardingNavigation from "../components/OnboardingNavigation";
 
 export default function ContextPage() {
-  const router = useRouter();
-
   const [notes, setNotes] = useState("");
   const [userName, setUserName] = useState("");
 
   /* ============================================================
-     LOAD USER + PREVIOUS NOTES
-     NO SUPABASE
-     NO API
+     LOAD USER NAME + SAVED CONTEXT
   ============================================================ */
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("signup_user");
+    /* ----------------------------------------------------------
+       Load signup user
+    ---------------------------------------------------------- */
 
-    if (savedUser) {
-      try {
+    try {
+      const savedUser = localStorage.getItem("signup_user");
+
+      if (savedUser) {
         const user = JSON.parse(savedUser);
 
-        if (user.full_name) {
+        if (user?.full_name) {
           setUserName(user.full_name);
         }
-      } catch (error) {
-        console.error("Failed to read signup user:", error);
       }
+    } catch (error) {
+      console.error("Failed to read signup user:", error);
     }
 
-    const savedContext = localStorage.getItem(
-      "onboarding_context"
-    );
+    /* ----------------------------------------------------------
+       Restore previously saved context
+    ---------------------------------------------------------- */
 
-    if (savedContext) {
-      try {
+    try {
+      const savedContext =
+        localStorage.getItem("onboarding_context");
+
+      if (savedContext) {
         const context = JSON.parse(savedContext);
 
-        if (context.notes) {
+        if (typeof context?.notes === "string") {
           setNotes(context.notes);
         }
-      } catch (error) {
-        console.error(
-          "Failed to read context data:",
-          error
-        );
       }
+    } catch (error) {
+      console.error(
+        "Failed to read context data:",
+        error
+      );
     }
   }, []);
-
-  /* ============================================================
-     OPEN WORKSPACE
-  ============================================================ */
-
-  const handleOpenWorkspace = () => {
-    localStorage.setItem(
-      "onboarding_context",
-      JSON.stringify({
-        notes: notes,
-      })
-    );
-
-    router.push("/workspace");
-  };
-
-  /* ============================================================
-     BACK
-  ============================================================ */
-
-  const handleBack = () => {
-    router.push("/onboarding/discovery");
-  };
 
   return (
     <>
@@ -113,7 +93,7 @@ export default function ContextPage() {
         <div className="mt-7 flex min-h-[620px] gap-[30px]">
 
           {/* ====================================================
-              LEFT STEPS
+              LEFT — STEPS
           ==================================================== */}
 
           <aside className="w-[224px] shrink-0">
@@ -163,26 +143,32 @@ export default function ContextPage() {
 
             <div className="relative h-full overflow-hidden rounded-[16px] border border-[#E1DED9] bg-white">
 
+              {/* Purple top border */}
+
               <div className="h-[3px] w-full bg-[#7C3AED]" />
 
               <div className="px-[42px] pt-[44px]">
 
+                {/* STEP */}
+
                 <p className="text-[12px] font-medium tracking-[1.2px] text-[#98948D]">
                   STEP 5 OF 5
                 </p>
+
+                {/* HEADING */}
 
                 <h2 className="mt-4 text-[28px] font-semibold leading-[34px] tracking-[-0.8px] text-[#111111]">
                   Anything else we should know?
                 </h2>
 
                 <p className="mt-2 max-w-[700px] text-[15px] leading-[24px] text-[#666666]">
-                  Drop notes, upload product docs / SOPs /
-                  FAQs. We use them to ground AI suggestions —
-                  they never leave your workspace.
+                  Drop notes, upload product docs / SOPs / FAQs.
+                  We use them to ground AI suggestions — they
+                  never leave your workspace.
                 </p>
 
                 {/* ==================================================
-                    WORKSPACE NOTES
+                    NOTES
                 ================================================== */}
 
                 <div className="mt-7">
@@ -197,7 +183,9 @@ export default function ContextPage() {
                   <textarea
                     id="workspaceNotes"
                     value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
+                    onChange={(e) =>
+                      setNotes(e.target.value)
+                    }
                     placeholder="e.g. We're a 5-person ecommerce brand selling skincare. We need cart recovery, COD confirmations, and a help-desk WhatsApp number."
                     maxLength={2000}
                     rows={8}
@@ -211,30 +199,24 @@ export default function ContextPage() {
                 </div>
 
                 {/* ==================================================
-                    BOTTOM NAVIGATION
+                    SHARED NAVIGATION
                 ================================================== */}
 
-                <div className="relative mt-[42px] flex items-center justify-between border-t border-[#E2DFDA] pt-[22px]">
+                <div className="mt-[42px]">
 
-                  <button
-                    type="button"
-                    onClick={handleBack}
-                    className="rounded-[8px] border border-[#E1DED9] bg-white px-4 py-2.5 text-[14px] font-medium text-[#333333] transition hover:bg-[#F8F7F5]"
-                  >
-                    ← Back
-                  </button>
-
-                  <span className="absolute left-1/2 -translate-x-1/2 text-[12px] text-[#99958F]">
-                    Step 5 of 5
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={handleOpenWorkspace}
-                    className="rounded-[8px] bg-[#075B48] px-5 py-2.5 text-[14px] font-semibold text-white transition hover:bg-[#064D3E]"
-                  >
-                    Open my workspace →
-                  </button>
+                  <OnboardingNavigation
+                    currentStep={5}
+                    nextPath="/workspace"
+                    backPath="/discovery"
+                    onContinue={() => {
+                      localStorage.setItem(
+                        "onboarding_context",
+                        JSON.stringify({
+                          notes,
+                        })
+                      );
+                    }}
+                  />
 
                 </div>
 
@@ -245,12 +227,14 @@ export default function ContextPage() {
           </section>
 
           {/* ====================================================
-              RIGHT PREVIEW
+              RIGHT — LIVE PREVIEW
           ==================================================== */}
 
           <aside className="w-[425px] shrink-0">
 
             <div className="rounded-[16px] border border-[#E1DED9] bg-white p-5">
+
+              {/* PREVIEW HEADER */}
 
               <div className="flex items-center justify-between">
 
@@ -274,16 +258,24 @@ export default function ContextPage() {
                 preferences can always be changed later.
               </p>
 
-              {/* MINI DASHBOARD */}
+              {/* =================================================
+                  MINI DASHBOARD
+              ================================================= */}
 
               <div className="mt-5 overflow-hidden rounded-[10px] border border-[#DDD9D3]">
+
+                {/* Browser bar */}
 
                 <div className="flex h-[34px] items-center justify-between border-b border-[#DDD9D3] px-3">
 
                   <div className="flex gap-1.5">
+
                     <span className="h-[7px] w-[7px] rounded-full bg-[#FF6257]" />
+
                     <span className="h-[7px] w-[7px] rounded-full bg-[#FFBD2E]" />
+
                     <span className="h-[7px] w-[7px] rounded-full bg-[#28C840]" />
+
                   </div>
 
                   <span className="text-[9px] text-[#88837D]">
@@ -294,7 +286,11 @@ export default function ContextPage() {
 
                 </div>
 
+                {/* Dashboard */}
+
                 <div className="flex min-h-[235px]">
+
+                  {/* Sidebar */}
 
                   <div className="w-[95px] border-r border-[#E2DFDA] p-2">
 
@@ -324,6 +320,8 @@ export default function ContextPage() {
 
                   </div>
 
+                  {/* Dashboard content */}
+
                   <div className="flex-1 p-3">
 
                     <h3 className="text-[12px] font-semibold">
@@ -333,6 +331,8 @@ export default function ContextPage() {
                     <p className="mt-1 text-[9px] text-[#99958F]">
                       Superblock for business
                     </p>
+
+                    {/* Customer metric */}
 
                     <div className="mt-3 rounded-[7px] border border-[#E2DFDA] p-2.5">
 
@@ -351,6 +351,8 @@ export default function ContextPage() {
                         </span>
 
                       </div>
+
+                      {/* Bar graph */}
 
                       <div className="mt-3 flex h-[30px] items-end gap-1">
 
@@ -373,6 +375,8 @@ export default function ContextPage() {
                       </div>
 
                     </div>
+
+                    {/* Suggested */}
 
                     <div className="mt-3 rounded-[7px] border border-[#BBD6CD] bg-[#EDF6F2] p-2.5">
 
@@ -404,7 +408,9 @@ export default function ContextPage() {
 
               </div>
 
-              {/* ENGAGEMENT TOOLS */}
+              {/* =================================================
+                  ENGAGEMENT TOOLS
+              ================================================= */}
 
               <div className="mt-4 rounded-[8px] border border-[#E1DED9] p-3">
 
@@ -430,7 +436,9 @@ export default function ContextPage() {
 
               </div>
 
-              {/* PREVIEW DETAILS */}
+              {/* =================================================
+                  PREVIEW DETAILS
+              ================================================= */}
 
               <div className="mt-4 grid grid-cols-2 gap-y-4">
 

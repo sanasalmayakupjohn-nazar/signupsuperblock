@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import OnboardingHeader from "../components/tempHeader";
+import OnboardingNavigation from "../components/comonboarding/page";
 
 import {
   FaBuilding,
@@ -69,32 +69,35 @@ const options = [
 ============================================================ */
 
 export default function DiscoveryPage() {
-  const router = useRouter();
-
   const [selected, setSelected] = useState("");
   const [userName, setUserName] = useState("");
 
   /* ============================================================
-     LOAD SIGNUP USER + PREVIOUS DISCOVERY
+     LOAD USER NAME + SAVED DISCOVERY
+     
      NO SUPABASE
      NO FETCH
      NO LAMBDA URL
   ============================================================ */
 
   useEffect(() => {
+    /* ---------------- USER ---------------- */
+
     const savedUser = localStorage.getItem("signup_user");
 
     if (savedUser) {
       try {
         const user = JSON.parse(savedUser);
 
-        if (user.full_name) {
+        if (user?.full_name) {
           setUserName(user.full_name);
         }
       } catch (error) {
         console.error("Failed to read signup user:", error);
       }
     }
+
+    /* ---------------- DISCOVERY ---------------- */
 
     const savedDiscovery = localStorage.getItem(
       "onboarding_discovery"
@@ -104,7 +107,7 @@ export default function DiscoveryPage() {
       try {
         const discovery = JSON.parse(savedDiscovery);
 
-        if (discovery.discovery) {
+        if (discovery?.discovery) {
           setSelected(discovery.discovery);
         }
       } catch (error) {
@@ -118,6 +121,9 @@ export default function DiscoveryPage() {
 
   /* ============================================================
      CONTINUE
+     
+     This function ONLY saves the page data.
+     OnboardingNavigation handles the actual navigation.
   ============================================================ */
 
   const handleContinue = () => {
@@ -127,16 +133,6 @@ export default function DiscoveryPage() {
         discovery: selected,
       })
     );
-
-    router.push("/context");
-  };
-
-  /* ============================================================
-     BACK
-  ============================================================ */
-
-  const handleBack = () => {
-    router.push("/onboarding/scale");
   };
 
   return (
@@ -163,10 +159,10 @@ export default function DiscoveryPage() {
           </h1>
 
           <p className="mt-3 max-w-[800px] text-[15px] leading-[24px] text-[#555555]">
-            Five quick questions — about a minute. We'll use
-            them to pick channel defaults, suggest templates,
-            and tune the copy across the app so it speaks your
-            business's language from day one.
+            Five quick questions — about a minute. We'll use them
+            to pick channel defaults, suggest templates, and tune
+            the copy across the app so it speaks your business's
+            language from day one.
           </p>
 
         </div>
@@ -178,7 +174,7 @@ export default function DiscoveryPage() {
         <div className="mt-7 flex min-h-[620px] gap-[30px]">
 
           {/* ====================================================
-              LEFT STEPS
+              LEFT — STEPS
           ==================================================== */}
 
           <aside className="w-[224px] shrink-0">
@@ -200,9 +196,13 @@ export default function DiscoveryPage() {
                     }`}
                   >
 
-                    {!step.title.includes("Context") && (
+                    {/* Vertical line */}
+
+                    {index < steps.length - 1 && (
                       <div className="absolute left-[22px] top-[48px] h-[28px] w-px bg-[#E2DFDA]" />
                     )}
+
+                    {/* Icon */}
 
                     <div
                       className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full ${
@@ -217,6 +217,8 @@ export default function DiscoveryPage() {
                         {completed ? "✓" : step.icon}
                       </span>
                     </div>
+
+                    {/* Text */}
 
                     <div>
 
@@ -258,25 +260,33 @@ export default function DiscoveryPage() {
 
             <div className="relative h-full overflow-hidden rounded-[16px] border border-[#E1DED9] bg-white">
 
+              {/* Purple top border */}
+
               <div className="h-[3px] w-full bg-[#7C3AED]" />
 
               <div className="px-[42px] pt-[44px]">
 
+                {/* STEP */}
+
                 <p className="text-[12px] font-medium tracking-[1.2px] text-[#98948D]">
                   STEP 4 OF 5
                 </p>
+
+                {/* HEADING */}
 
                 <h2 className="mt-4 text-[28px] font-semibold leading-[34px] tracking-[-0.8px] text-[#111111]">
                   How did you hear about Superblock?
                 </h2>
 
                 <p className="mt-2 max-w-[700px] text-[15px] leading-[24px] text-[#666666]">
-                  Optional, but it helps us understand what
-                  brought you here. Your answer helps us build
-                  more of what works.
+                  Optional, but it helps us understand what brought
+                  you here. Your answer helps us build more of what
+                  works.
                 </p>
 
-                {/* OPTIONS */}
+                {/* =================================================
+                    OPTIONS
+                ================================================= */}
 
                 <div className="mt-7 grid grid-cols-3 gap-[10px]">
 
@@ -298,7 +308,9 @@ export default function DiscoveryPage() {
 
                         <div className="flex items-center justify-between">
 
-                          <span>{option}</span>
+                          <span>
+                            {option}
+                          </span>
 
                           {isSelected && (
                             <span className="ml-3 flex h-[20px] w-[20px] items-center justify-center rounded-full bg-[#075B48] text-[11px] text-white">
@@ -314,31 +326,20 @@ export default function DiscoveryPage() {
 
                 </div>
 
-                {/* BOTTOM NAVIGATION */}
+              </div>
 
-                <div className="relative mt-[42px] flex items-center justify-between border-t border-[#E2DFDA] pt-[22px]">
+              {/* =================================================
+                  SHARED BOTTOM NAVIGATION
+              ================================================= */}
 
-                  <button
-                    type="button"
-                    onClick={handleBack}
-                    className="rounded-[8px] border border-[#E1DED9] bg-white px-4 py-2.5 text-[14px] font-medium text-[#333333] transition hover:bg-[#F8F7F5]"
-                  >
-                    ← Back
-                  </button>
+              <div className="mt-[42px]">
 
-                  <span className="absolute left-1/2 -translate-x-1/2 text-[12px] text-[#99958F]">
-                    Step 4 of 5
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={handleContinue}
-                    className="rounded-[8px] bg-[#075B48] px-5 py-2.5 text-[14px] font-semibold text-white transition hover:bg-[#064D3E]"
-                  >
-                    Continue →
-                  </button>
-
-                </div>
+                <OnboardingNavigation
+                  currentStep={4}
+                  nextPath="/context"
+                  backPath="/onboarding/scale"
+                  onContinue={handleContinue}
+                />
 
               </div>
 
@@ -347,12 +348,14 @@ export default function DiscoveryPage() {
           </section>
 
           {/* ====================================================
-              RIGHT PREVIEW
+              RIGHT — LIVE PREVIEW
           ==================================================== */}
 
           <aside className="w-[425px] shrink-0">
 
             <div className="rounded-[16px] border border-[#E1DED9] bg-white p-5">
+
+              {/* PREVIEW HEADER */}
 
               <div className="flex items-center justify-between">
 
@@ -371,21 +374,29 @@ export default function DiscoveryPage() {
               </div>
 
               <p className="mt-2 text-[13px] leading-[20px] text-[#99958F]">
-                Your workspace stays calm and neutral — these
-                colours are only onboarding guideposts. Your
-                preferences can always be changed later.
+                Your workspace stays calm and neutral — these colours
+                are only onboarding guideposts. Your preferences can
+                always be changed later.
               </p>
 
-              {/* MINI DASHBOARD */}
+              {/* =================================================
+                  MINI DASHBOARD
+              ================================================= */}
 
               <div className="mt-5 overflow-hidden rounded-[10px] border border-[#DDD9D3]">
+
+                {/* Browser bar */}
 
                 <div className="flex h-[34px] items-center justify-between border-b border-[#DDD9D3] px-3">
 
                   <div className="flex gap-1.5">
+
                     <span className="h-[7px] w-[7px] rounded-full bg-[#FF6257]" />
+
                     <span className="h-[7px] w-[7px] rounded-full bg-[#FFBD2E]" />
+
                     <span className="h-[7px] w-[7px] rounded-full bg-[#28C840]" />
+
                   </div>
 
                   <span className="text-[9px] text-[#88837D]">
@@ -396,7 +407,11 @@ export default function DiscoveryPage() {
 
                 </div>
 
+                {/* Dashboard */}
+
                 <div className="flex min-h-[235px]">
+
+                  {/* Sidebar */}
 
                   <div className="w-[95px] border-r border-[#E2DFDA] p-2">
 
@@ -426,6 +441,8 @@ export default function DiscoveryPage() {
 
                   </div>
 
+                  {/* Dashboard content */}
+
                   <div className="flex-1 p-3">
 
                     <h3 className="text-[12px] font-semibold">
@@ -435,6 +452,8 @@ export default function DiscoveryPage() {
                     <p className="mt-1 text-[9px] text-[#99958F]">
                       Superblock for business
                     </p>
+
+                    {/* Customer metric */}
 
                     <div className="mt-3 rounded-[7px] border border-[#E2DFDA] p-2.5">
 
@@ -453,6 +472,8 @@ export default function DiscoveryPage() {
                         </span>
 
                       </div>
+
+                      {/* Bar graph */}
 
                       <div className="mt-3 flex h-[30px] items-end gap-1">
 
@@ -475,6 +496,8 @@ export default function DiscoveryPage() {
                       </div>
 
                     </div>
+
+                    {/* Suggested */}
 
                     <div className="mt-3 rounded-[7px] border border-[#BBD6CD] bg-[#EDF6F2] p-2.5">
 
@@ -506,7 +529,9 @@ export default function DiscoveryPage() {
 
               </div>
 
-              {/* PREVIEW DETAILS */}
+              {/* =================================================
+                  PREVIEW DETAILS
+              ================================================= */}
 
               <div className="mt-4 grid grid-cols-2 gap-y-4">
 
@@ -555,6 +580,7 @@ export default function DiscoveryPage() {
           </aside>
 
         </div>
+
       </main>
     </>
   );
