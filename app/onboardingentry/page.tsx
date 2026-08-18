@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabase";
 import OnboardingHeader from "../components/tempHeader";
 
 
@@ -171,31 +170,20 @@ export default function OnboardingPage() {
   ========================================================== */
 
   useEffect(() => {
-    const getUserName = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  const savedUser = localStorage.getItem("signup_user");
 
-      if (!user) return;
+  if (!savedUser) return;
 
-      const { data, error } = await supabase
-        .from("superblockusers")
-        .select("full_name")
-        .eq("id", user.id)
-        .single();
+  try {
+    const user = JSON.parse(savedUser);
 
-      if (error) {
-        console.error("Error fetching user name:", error);
-        return;
-      }
-
-      if (data?.full_name) {
-        setUserName(data.full_name);
-      }
-    };
-
-    getUserName();
-  }, []);
+    if (user.full_name) {
+      setUserName(user.full_name);
+    }
+  } catch (error) {
+    console.error("Failed to read signup user:", error);
+  }
+}, []);
 
   /* ==========================================================
      INDUSTRY SELECT
@@ -210,8 +198,16 @@ export default function OnboardingPage() {
   ========================================================== */
 
   const handleContinue = () => {
-    router.push("/use-cases");
-  };
+  localStorage.setItem(
+    "onboarding_industry",
+    JSON.stringify({
+      industry: selectedIndustry,
+      closest_match: closestMatch,
+    })
+  );
+
+  router.push("/use-cases");
+};
 
   /* ==========================================================
      BACK
@@ -354,7 +350,7 @@ export default function OnboardingPage() {
                {/* Step */}
 
               <p className="text-[12px] font-medium tracking-[1.2px] text-[#98948D]">
-                STEP 2 OF 5
+                STEP 1 OF 5
               </p>
 
             {/* Heading */}

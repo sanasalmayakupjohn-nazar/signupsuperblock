@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabase";
 import OnboardingHeader from "../components/tempHeader";
 import {
   FaBuilding,
@@ -147,31 +146,20 @@ const [selectedUseCases, setSelectedUseCases] = useState<string[]>([
   const [userName, setUserName] = useState("");
 
   useEffect(() => {
-    const getUserName = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  const savedUser = localStorage.getItem("signup_user");
 
-      if (!user) return;
+  if (!savedUser) return;
 
-      const { data, error } = await supabase
-        .from("superblockusers")
-        .select("full_name")
-        .eq("id", user.id)
-        .single();
+  try {
+    const user = JSON.parse(savedUser);
 
-      if (error) {
-        console.error("Error fetching user name:", error);
-        return;
-      }
-
-      if (data?.full_name) {
-        setUserName(data.full_name);
-      }
-    };
-
-    getUserName();
-  }, []);
+    if (user.full_name) {
+      setUserName(user.full_name);
+    }
+  } catch (error) {
+    console.error("Failed to read signup user:", error);
+  }
+}, []);
 
   const toggleUseCase = (title: string) => {
   setSelectedUseCases((current) => {
@@ -190,6 +178,13 @@ const [selectedUseCases, setSelectedUseCases] = useState<string[]>([
   });
 };
 const handleContinue = () => {
+  localStorage.setItem(
+    "onboarding_use_cases",
+    JSON.stringify({
+      use_cases: selectedUseCases,
+    })
+  );
+
   router.push("/scale");
 };
   return (
@@ -421,11 +416,12 @@ const handleContinue = () => {
               <div className="relative mt-[42px] flex items-center justify-between border-t border-[#E2DFDA] pt-[22px]">
 
                 <button
-                  type="button"
-                  className="rounded-[8px] border border-[#E1DED9] bg-white px-4 py-2 text-[14px] text-[#202020]"
-                >
-                  ← Back
-                </button>
+  type="button"
+  onClick={() => router.push("/onboardingentry")}
+  className="rounded-[8px] border border-[#E1DED9] bg-white px-4 py-2 text-[14px] text-[#202020]"
+>
+  ← Back
+</button>
 
 
                 <span className="absolute left-1/2 -translate-x-1/2 text-[12px] text-[#99958F]">

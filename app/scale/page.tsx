@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabase";
 import OnboardingHeader from "../components/tempHeader";
 
 import {
@@ -132,39 +131,36 @@ export default function ScalePage() {
   ========================================================== */
 
   useEffect(() => {
-    const getUserName = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  const savedUser = localStorage.getItem("signup_user");
 
-      if (!user) return;
+  if (!savedUser) return;
 
-      const { data, error } = await supabase
-        .from("superblockusers")
-        .select("full_name")
-        .eq("id", user.id)
-        .single();
+  try {
+    const user = JSON.parse(savedUser);
 
-      if (error) {
-        console.error("Error fetching user name:", error);
-        return;
-      }
-
-      if (data?.full_name) {
-        setUserName(data.full_name);
-      }
-    };
-
-    getUserName();
-  }, []);
-
+    if (user.full_name) {
+      setUserName(user.full_name);
+    }
+  } catch (error) {
+    console.error("Failed to read signup user:", error);
+  }
+}, []);
   /* ==========================================================
      CONTINUE
   ========================================================== */
+const handleContinue = () => {
+  localStorage.setItem(
+    "onboarding_scale",
+    JSON.stringify({
+      team_size: teamSize,
+      role: role,
+      message_volume: messageVolume,
+      objective: objective,
+    })
+  );
 
-  const handleContinue = () => {
-    router.push("/discovery");
-  };
+  router.push("/discovery");
+};
 
   /* ==========================================================
      BACK
