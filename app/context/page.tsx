@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import OnboardingHeader from "../components/tempHeader";
-import OnboardingNavigation from "../components/OnboardingNavigation";
+import OnboardingNavigation from "../components/comonboarding/page";
 
 export default function ContextPage() {
   const [notes, setNotes] = useState("");

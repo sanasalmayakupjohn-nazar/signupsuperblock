@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
 
 import {
   FaWhatsapp,
@@ -34,6 +33,10 @@ export default function Home() {
     password: "",
   });
 
+  /* ============================================================
+     SIGNUP
+  ============================================================ */
+
   const handleSignup = async () => {
     console.log("Signup started");
 
@@ -45,7 +48,10 @@ export default function Home() {
 
     let hasError = false;
 
-    // Full name validation
+    /* ==========================================================
+       FULL NAME VALIDATION
+    ========================================================== */
+
     if (!fullName.trim()) {
       setErrors((prev) => ({
         ...prev,
@@ -55,7 +61,10 @@ export default function Home() {
       hasError = true;
     }
 
-    // Email validation
+    /* ==========================================================
+       EMAIL VALIDATION
+    ========================================================== */
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!email.trim()) {
@@ -74,7 +83,10 @@ export default function Home() {
       hasError = true;
     }
 
-    // Password validation
+    /* ==========================================================
+       PASSWORD VALIDATION
+    ========================================================== */
+
     if (!password.trim()) {
       setErrors((prev) => ({
         ...prev,
@@ -107,7 +119,10 @@ export default function Home() {
       hasError = true;
     }
 
-    // Stop if validation failed
+    /* ==========================================================
+       STOP IF VALIDATION FAILED
+    ========================================================== */
+
     if (hasError) {
       return;
     }
@@ -115,87 +130,63 @@ export default function Home() {
     setLoading(true);
 
     try {
-      // ==============================
-      // CREATE SUPABASE USER
-      // ==============================
+      /* ========================================================
+         SAVE SIGNUP DATA LOCALLY
+      ======================================================== */
 
-      const { data, error } = await supabase.auth.signUp({
+      const signupUser = {
+        full_name: fullName.trim(),
         email: email.trim(),
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/login`,
-        },
-      });
+        password: password,
+      };
 
-      if (error) {
-        console.error("Signup error:", error);
-        alert(error.message);
-        return;
-      }
+      localStorage.setItem(
+        "signup_user",
+        JSON.stringify(signupUser)
+      );
 
-      if (!data.user) {
-        alert("Account creation failed.");
-        return;
-      }
+      console.log(
+        "Signup data saved:",
+        signupUser
+      );
 
-      console.log("Supabase user created:", data.user);
+      /* ========================================================
+         OPTIONAL: SEND DATA TO N8N
+      ======================================================== */
 
-      // ==============================
-      // CREATE PROFILE
-      // ==============================
+      const webhookUrl =
+        process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
 
-      const { error: profileError } = await supabase
-        .from("superblockusers")
-        .insert({
-          id: data.user.id,
-          full_name: fullName.trim(),
-          email: email.trim(),
-        });
-
-      if (profileError) {
-        console.error(
-          "Profile insert error:",
-          profileError
-        );
-
-        alert(
-          "Account was created, but your profile could not be saved."
-        );
-
-        return;
-      }
-
-      // ==============================
-      // SEND DATA TO N8N
-      // ==============================
-
-      try {
-        await fetch(
-          process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL!,
-          {
+      if (webhookUrl) {
+        try {
+          await fetch(webhookUrl, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              id: data.user.id,
               full_name: fullName.trim(),
               email: email.trim(),
             }),
-          }
-        );
+          });
 
-        console.log("Signup data sent to n8n");
-      } catch (n8nError) {
-        console.error(
-          "n8n webhook error:",
-          n8nError
-        );
+          console.log("Signup data sent to n8n");
+        } catch (n8nError) {
+          console.error(
+            "n8n webhook error:",
+            n8nError
+          );
+
+          /*
+           * Do not stop signup if n8n fails.
+           * User can still continue.
+           */
+        }
       }
 
-      // ==============================
-      // GO TO BUSINESS SIGNUP
-      // ==============================
+      /* ========================================================
+         GO TO BUSINESS PAGE
+      ======================================================== */
 
       window.location.href = "/signup/business";
     } catch (error) {
@@ -214,6 +205,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen w-full bg-[#FAFAF8] text-[#0A0A0A]">
+
       <div className="flex min-h-screen">
 
         {/* =====================================================
@@ -225,6 +217,7 @@ export default function Home() {
           {/* Logo */}
 
           <div className="flex items-center">
+
             <img
               src="/super block 1.png"
               alt="Superblock"
@@ -234,39 +227,51 @@ export default function Home() {
             <span className="ml-[-35px] text-[24px] font-semibold tracking-[-0.4px] text-[#008A43]">
               Superblock
             </span>
+
           </div>
 
           {/* Badge */}
 
           <div className="mt-14 inline-flex w-fit rounded-full bg-[#E8EFEC] px-[10px] py-[5px]">
+
             <span className="text-[11px] font-medium leading-[16.5px] tracking-[0.88px] text-[#064E3B]">
               FREE FOREVER · NO CREDIT CARD
             </span>
+
           </div>
 
-          {/* Main Heading */}
+          {/* Heading */}
 
           <h1 className="mt-7 max-w-[620px] text-[44px] font-semibold leading-[46.2px] tracking-[-0.88px] text-[#0A0A0A]">
+
             Every channel your customers
+
             <br />
+
             use,{" "}
+
             <span className="text-[#064E3B]">
               in one workspace
             </span>
+
           </h1>
 
           {/* Description */}
 
           <p className="mt-5 max-w-[448px] text-[15px] font-normal leading-[23.25px] text-[#525252]">
+
             WhatsApp, RCS, Instagram, Email, SMS, AI voice,
             chatbots, automations and funnels — built for teams
             that need to ship and scale.
+
           </p>
 
           {/* Feature Heading */}
 
           <p className="mt-10 text-[11px] font-medium leading-[16.5px] tracking-[0.88px] text-[#8E8B85]">
+
             BUILT INTO YOUR WORKSPACE
+
           </p>
 
           {/* =====================================================
@@ -274,8 +279,6 @@ export default function Home() {
           ===================================================== */}
 
           <div className="mt-3 grid max-w-[620px] grid-cols-2 gap-3">
-
-            {/* WhatsApp */}
 
             <FeatureCard
               icon={
@@ -286,8 +289,6 @@ export default function Home() {
               description="Official Meta integration"
             />
 
-            {/* RCS */}
-
             <FeatureCard
               icon={
                 <SiGooglemessages className="text-[17px] text-[#FF5B76]" />
@@ -296,8 +297,6 @@ export default function Home() {
               title="RCS Business Messaging"
               description="Verified branded chats"
             />
-
-            {/* Instagram */}
 
             <FeatureCard
               icon={
@@ -308,8 +307,6 @@ export default function Home() {
               description="Auto-replies + creator tools"
             />
 
-            {/* Email */}
-
             <FeatureCard
               icon={
                 <FaEnvelope className="text-[16px] text-[#149BD7]" />
@@ -318,8 +315,6 @@ export default function Home() {
               title="Email Marketing"
               description="Drag-and-drop journeys"
             />
-
-            {/* SMS */}
 
             <FeatureCard
               icon={
@@ -330,8 +325,6 @@ export default function Home() {
               description="DLT-compliant routing"
             />
 
-            {/* AI Voice */}
-
             <FeatureCard
               icon={
                 <FaMicrophone className="text-[15px] text-[#F59E0B]" />
@@ -341,8 +334,6 @@ export default function Home() {
               description="24/7 inbound + outbound"
             />
 
-            {/* AI Chatbots */}
-
             <FeatureCard
               icon={
                 <FaRobot className="text-[16px] text-[#16B981]" />
@@ -351,8 +342,6 @@ export default function Home() {
               title="AI Chatbots"
               description="RAG over your data"
             />
-
-            {/* Funnels */}
 
             <FeatureCard
               icon={
@@ -364,8 +353,6 @@ export default function Home() {
               title="Funnels & Page Builder"
               description="Lead capture in minutes"
             />
-
-            {/* Workflow */}
 
             <FeatureCard
               icon={
@@ -390,8 +377,6 @@ export default function Home() {
               description="Connect your entire workflow"
             />
 
-            {/* Blue Tick */}
-
             <FeatureCard
               icon={
                 <span className="flex h-[17px] w-[17px] items-center justify-center rounded-full bg-[#38A5E8] text-white">
@@ -402,6 +387,7 @@ export default function Home() {
               title="Free Blue Tick Application"
               description="Get your business verified"
             />
+
           </div>
 
           {/* Security */}
@@ -410,9 +396,8 @@ export default function Home() {
 
             <div className="flex items-center gap-5">
 
-              {/* SOC 2 */}
-
               <div className="flex items-center gap-2">
+
                 <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
                   🛡️
                 </div>
@@ -420,42 +405,49 @@ export default function Home() {
                 <span className="text-[10px] font-medium text-[#8E8B85]">
                   SOC 2 Type II
                 </span>
+
               </div>
 
-              {/* ISO */}
-
               <div className="flex items-center gap-2">
+
                 <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+
                   <FaLock className="text-[9px] text-[#8E8B85]" />
+
                 </div>
 
                 <span className="text-[10px] font-medium text-[#8E8B85]">
                   ISO 27001
                 </span>
+
               </div>
 
-              {/* GDPR */}
-
               <div className="flex items-center gap-2">
+
                 <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+
                   <FaCheck className="text-[9px] text-[#16A34A]" />
+
                 </div>
 
                 <span className="text-[10px] font-medium text-[#8E8B85]">
                   GDPR ready
                 </span>
+
               </div>
 
-              {/* Uptime */}
-
               <div className="flex items-center gap-2">
+
                 <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#D8D5CF] bg-white">
+
                   <FaBolt className="text-[9px] text-[#EAB308]" />
+
                 </div>
 
                 <span className="text-[10px] font-medium text-[#8E8B85]">
                   99.99% uptime
                 </span>
+
               </div>
 
             </div>
@@ -469,11 +461,13 @@ export default function Home() {
           {/* Footer */}
 
           <div className="mt-auto pt-8 text-[11px] text-[#8E8B85]">
+
             © 2026 Superblock
             {" · "}
             Privacy
             {" · "}
             Terms
+
           </div>
 
         </section>
@@ -483,8 +477,6 @@ export default function Home() {
         ===================================================== */}
 
         <section className="flex w-[45%] items-center justify-center border-l border-[#E7E5E0] bg-[#FAFAF8] px-10">
-
-          {/* Signup Card */}
 
           <div className="w-full max-w-[420px] rounded-[12px] border border-[#E7E5E0] bg-white p-8">
 
@@ -522,13 +514,20 @@ export default function Home() {
               Get started with Superblock — takes under a minute
             </p>
 
-            {/* Full Name */}
+            {/* =================================================
+                FULL NAME
+            ================================================= */}
 
             <div className="mt-7">
 
               <label className="text-[13px] font-medium leading-[19.5px] text-[#525252]">
+
                 Full name{" "}
-                <span className="text-[#EF4444]">*</span>
+
+                <span className="text-[#EF4444]">
+                  *
+                </span>
+
               </label>
 
               <input
@@ -536,12 +535,14 @@ export default function Home() {
                 placeholder="Jane Smith"
                 value={fullName}
                 onChange={(e) => {
+
                   setFullName(e.target.value);
 
                   setErrors((prev) => ({
                     ...prev,
                     fullName: "",
                   }));
+
                 }}
                 className={`mt-2 h-10 w-full rounded-[8px] border bg-white px-3 text-[13px] text-[#0A0A0A] outline-none placeholder:text-[#8E8B85] focus:border-[#064E3B] ${
                   errors.fullName
@@ -551,20 +552,29 @@ export default function Home() {
               />
 
               {errors.fullName && (
+
                 <p className="mt-1 text-[11px] text-[#EF4444]">
                   {errors.fullName}
                 </p>
+
               )}
 
             </div>
 
-            {/* Email */}
+            {/* =================================================
+                EMAIL
+            ================================================= */}
 
             <div className="mt-4">
 
               <label className="text-[13px] font-medium leading-[19.5px] text-[#525252]">
+
                 Work email{" "}
-                <span className="text-[#EF4444]">*</span>
+
+                <span className="text-[#EF4444]">
+                  *
+                </span>
+
               </label>
 
               <input
@@ -572,12 +582,14 @@ export default function Home() {
                 placeholder="jane@company.com"
                 value={email}
                 onChange={(e) => {
+
                   setEmail(e.target.value);
 
                   setErrors((prev) => ({
                     ...prev,
                     email: "",
                   }));
+
                 }}
                 className={`mt-2 h-10 w-full rounded-[8px] border bg-white px-3 text-[13px] text-[#0A0A0A] outline-none placeholder:text-[#8E8B85] focus:border-[#064E3B] ${
                   errors.email
@@ -587,20 +599,29 @@ export default function Home() {
               />
 
               {errors.email && (
+
                 <p className="mt-1 text-[11px] text-[#EF4444]">
                   {errors.email}
                 </p>
+
               )}
 
             </div>
 
-            {/* Password */}
+            {/* =================================================
+                PASSWORD
+            ================================================= */}
 
             <div className="mt-4">
 
               <label className="text-[13px] font-medium leading-[19.5px] text-[#525252]">
+
                 Password{" "}
-                <span className="text-[#EF4444]">*</span>
+
+                <span className="text-[#EF4444]">
+                  *
+                </span>
+
               </label>
 
               <div className="relative mt-2">
@@ -614,12 +635,14 @@ export default function Home() {
                   placeholder="Min. 8 characters"
                   value={password}
                   onChange={(e) => {
+
                     setPassword(e.target.value);
 
                     setErrors((prev) => ({
                       ...prev,
                       password: "",
                     }));
+
                   }}
                   className={`h-10 w-full rounded-[8px] border bg-white px-3 pr-10 text-[13px] text-[#0A0A0A] outline-none placeholder:text-[#8E8B85] focus:border-[#064E3B] ${
                     errors.password
@@ -640,24 +663,30 @@ export default function Home() {
                       : "Show password"
                   }
                 >
+
                   {showPassword ? (
                     <FaEyeSlash />
                   ) : (
                     <FaEye />
                   )}
+
                 </button>
 
               </div>
 
               {errors.password && (
+
                 <p className="mt-1 text-[11px] text-[#EF4444]">
                   {errors.password}
                 </p>
+
               )}
 
             </div>
 
-            {/* Continue */}
+            {/* =================================================
+                CONTINUE
+            ================================================= */}
 
             <button
               type="button"
@@ -665,16 +694,21 @@ export default function Home() {
               disabled={loading}
               className="mt-6 h-10 w-full rounded-[8px] bg-[#064E3B] text-[13px] font-medium text-[#FAFAFA] transition hover:bg-[#053D30] disabled:cursor-not-allowed disabled:opacity-60"
             >
+
               {loading
-                ? "Creating account..."
+                ? "Saving..."
                 : "Continue   →"}
+
             </button>
 
             {/* Encryption */}
 
             <p className="mt-6 flex items-center justify-center gap-1.5 text-[12px] text-[#8E8B85]">
+
               <FaLock className="text-[11px]" />
+
               256-bit encryption
+
             </p>
 
             {/* Sign In */}
@@ -697,11 +731,13 @@ export default function Home() {
             {/* Footer */}
 
             <div className="mt-8 text-center text-[11px] text-[#8E8B85]">
+
               © 2026 Superblock
               {" · "}
               Privacy
               {" · "}
               Terms
+
             </div>
 
           </div>
@@ -709,12 +745,13 @@ export default function Home() {
         </section>
 
       </div>
+
     </main>
   );
 }
 
 /* ============================================================
-   FEATURE CARD COMPONENT
+   FEATURE CARD
 ============================================================ */
 
 function FeatureCard({
