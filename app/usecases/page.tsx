@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import OnboardingHeader from "../components/tempHeader";
-import OnboardingNavigation from "../components/comonboarding/page";
+import OnboardingHeader from "@/components/OnboardingHeader";
+import OnboardingNavigation from "@/components/OnboardingNavigation";
 
 import {
   FaBuilding,
@@ -23,160 +23,140 @@ import {
 } from "react-icons/fa";
 
 /* ============================================================
-   USE CASES
+   USE CASES DATA WITH EXACT ACCENTS & ICONS
 ============================================================ */
 
 const useCases = [
   {
+    id: "marketing_campaigns",
     title: "Marketing campaigns",
     description: "Promotions, launches, drips.",
     icon: <FaBullhorn />,
-    bg: "bg-[#FFF1DC]",
-    text: "text-[#F59E0B]",
-    selectedBorder: "border-[#F59E0B]",
+    accent: "#F59E0B",
   },
   {
+    id: "customer_support",
     title: "Customer support",
     description: "Inbox, agents, SLAs.",
     icon: <FaHeadphones />,
-    bg: "bg-[#E5F5FC]",
-    text: "text-[#009FE3]",
-    selectedBorder: "border-[#009FE3]",
+    accent: "#0EA5E9",
   },
   {
+    id: "lead_generation",
     title: "Lead generation",
     description: "Capture, qualify, route.",
     icon: <FaBullseye />,
-    bg: "bg-[#FFE9ED]",
-    text: "text-[#F43F5E]",
-    selectedBorder: "border-[#F43F5E]",
+    accent: "#F43F5E",
   },
   {
+    id: "ecommerce_sales",
     title: "Ecommerce sales",
     description: "Carts, catalog, checkout.",
     icon: <FaShoppingCart />,
-    bg: "bg-[#F0E8FF]",
-    text: "text-[#7C3AED]",
-    selectedBorder: "border-[#8B5CF6]",
+    accent: "#8B5CF6",
   },
   {
+    id: "appointment_booking",
     title: "Bookings & appointments",
     description: "Reminders, no-show recovery.",
     icon: <FaCalendarAlt />,
-    bg: "bg-[#EDEBFF]",
-    text: "text-[#6366F1]",
-    selectedBorder: "border-[#6366F1]",
+    accent: "#6366F1",
   },
   {
+    id: "community_engagement",
     title: "Community engagement",
     description: "Members, cohorts, events.",
     icon: <FaUsers />,
-    bg: "bg-[#DDF7EE]",
-    text: "text-[#10B981]",
-    selectedBorder: "border-[#10B981]",
+    accent: "#14B8A6",
   },
   {
+    id: "automation_workflows",
     title: "Automation & workflows",
     description: "Triggers, sequences.",
     icon: <FaProjectDiagram />,
-    bg: "bg-[#E5EDFF]",
-    text: "text-[#3B82F6]",
-    selectedBorder: "border-[#3B82F6]",
+    accent: "#3B82F6",
   },
   {
+    id: "ai_chatbots",
     title: "AI chatbots",
     description: "RAG-powered conversations.",
     icon: <FaRobot />,
-    bg: "bg-[#F8E8FF]",
-    text: "text-[#D946EF]",
-    selectedBorder: "border-[#D946EF]",
+    accent: "#D946EF",
   },
   {
+    id: "webinars_coaching",
     title: "Webinars & coaching",
     description: "Hosting, reminders, replays.",
     icon: <FaChalkboardTeacher />,
-    bg: "bg-[#FFF0E4]",
-    text: "text-[#F97316]",
-    selectedBorder: "border-[#F97316]",
+    accent: "#F97316",
   },
   {
+    id: "notifications_alerts",
     title: "Notifications & alerts",
     description: "Transactional, OTPs.",
     icon: <FaBell />,
-    bg: "bg-[#E5F7FC]",
-    text: "text-[#0891B2]",
-    selectedBorder: "border-[#0891B2]",
+    accent: "#06B6D4",
   },
 ];
 
 /* ============================================================
-   ONBOARDING STEPS
+   STEPS
 ============================================================ */
 
 const steps = [
   {
+    id: 1,
     title: "Industry",
     subtitle: "Pick your industry",
     icon: <FaBuilding />,
   },
   {
+    id: 2,
     title: "Use cases",
     subtitle: "What you'll send",
     icon: <FaMagic />,
   },
   {
+    id: 3,
     title: "Scale",
     subtitle: "Team & volume",
     icon: <FaChartBar />,
   },
   {
+    id: 4,
     title: "Discovery",
     subtitle: "How you found us",
     icon: <FaCompass />,
   },
   {
+    id: 5,
     title: "Context",
-    subtitle: "Notes & docs",
+    subtitle: "Workspace notes",
     icon: <FaStar />,
   },
 ];
 
-/* ============================================================
-   PAGE
-============================================================ */
-
-export default function OnboardingPage() {
-  /* ==========================================================
-     SELECTED USE CASES
-  ========================================================== */
-
+export default function UseCasesPage() {
   const [selectedUseCases, setSelectedUseCases] = useState<string[]>([
-    "Marketing campaigns",
-    "Customer support",
-    "Ecommerce sales",
-    "Automation & workflows",
-    "Notifications & alerts",
+    "marketing_campaigns",
+    "customer_support",
+    "ecommerce_sales",
+    "automation_workflows",
+    "notifications_alerts",
   ]);
 
   const [userName, setUserName] = useState("");
+  const [industryTitle, setIndustryTitle] = useState("Ecommerce & D2C");
 
   /* ==========================================================
-     LOAD USER + PREVIOUS USE CASES
-
-     NO SUPABASE
-     NO FETCH
-     NO LAMBDA URL
+     LOAD SAVED USER + PREVIOUS USE CASES & INDUSTRY
   ========================================================== */
 
   useEffect(() => {
-    /* ---------------- USER ---------------- */
-
     const savedUser = localStorage.getItem("signup_user");
-
     if (savedUser) {
       try {
         const user = JSON.parse(savedUser);
-
         if (user.full_name) {
           setUserName(user.full_name);
         }
@@ -185,580 +165,463 @@ export default function OnboardingPage() {
       }
     }
 
-    /* ---------------- USE CASES ---------------- */
+    const savedIndustry = localStorage.getItem("onboarding_industry");
+    if (savedIndustry) {
+      try {
+        const indData = JSON.parse(savedIndustry);
+        if (indData.title) {
+          setIndustryTitle(indData.title);
+        } else if (indData.industry) {
+          setIndustryTitle(indData.industry);
+        }
+      } catch (error) {
+        console.error("Failed to read industry:", error);
+      }
+    }
 
-    const savedUseCases = localStorage.getItem(
-      "onboarding_use_cases"
-    );
-
+    const savedUseCases = localStorage.getItem("onboarding_use_cases");
     if (savedUseCases) {
       try {
         const data = JSON.parse(savedUseCases);
-
-        if (
-          Array.isArray(data.use_cases) &&
-          data.use_cases.length > 0
-        ) {
+        if (Array.isArray(data.use_cases) && data.use_cases.length > 0) {
           setSelectedUseCases(data.use_cases);
         }
       } catch (error) {
-        console.error(
-          "Failed to read onboarding use cases:",
-          error
-        );
+        console.error("Failed to read onboarding use cases:", error);
       }
     }
   }, []);
 
   /* ==========================================================
-     TOGGLE USE CASE
-
-     MAXIMUM 5
+     TOGGLE USE CASE (UP TO 5)
   ========================================================== */
 
-  const toggleUseCase = (title: string) => {
+  const toggleUseCase = (idOrTitle: string) => {
     setSelectedUseCases((current) => {
-      /* Remove if already selected */
-
-      if (current.includes(title)) {
-        return current.filter((item) => item !== title);
+      if (current.includes(idOrTitle)) {
+        return current.filter((item) => item !== idOrTitle);
       }
-
-      /* Maximum 5 */
-
       if (current.length >= 5) {
         return current;
       }
-
-      /* Add */
-
-      return [...current, title];
+      return [...current, idOrTitle];
     });
   };
 
   return (
-    <>
+    <div className="relative min-h-dvh overflow-hidden bg-[#FAFAF8] text-[#111111]">
       <OnboardingHeader />
 
-      <main className="min-h-screen bg-[#FAFAF8] text-[#111111]">
+      {/* Background glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full opacity-[0.18] blur-3xl transition-colors duration-[600ms]"
+        style={{ backgroundColor: "#8B5CF6" }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-44 -left-32 h-[420px] w-[420px] rounded-full opacity-[0.10] blur-3xl"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(6, 78, 59, 0.35) 0%, transparent 70%)",
+        }}
+      />
 
+      {/* ====================================================
+          PAGE HEADER
+      ==================================================== */}
+
+      <section className="relative mx-auto px-5 pb-4 pt-8 sm:px-8 sm:pb-5 sm:pt-10">
+        <p className="mb-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-[#8E8B85]">
+          WELCOME TO SUPERBLOCK
+        </p>
+
+        <h1 className="max-w-[720px] text-[28px] font-semibold leading-[1.05] tracking-[-0.028em] text-[#111111] sm:text-[32px]">
+          {userName ? `Hey ${userName}, ` : "Hey there, "}
+          <span className="font-medium text-[#525252]">
+            let's shape your workspace.
+          </span>
+        </h1>
+
+        <p className="mt-2.5 max-w-[640px] text-[13.5px] leading-[1.55] text-[#525252]">
+          Five quick questions — about a minute. We'll use them to pick channel
+          defaults, suggest templates, and tune the copy across the app so it
+          speaks your business's language from day one.
+        </p>
+      </section>
+
+      {/* ====================================================
+          MAIN 3-COLUMN LAYOUT
+      ==================================================== */}
+
+      <main className="relative mx-auto grid grid-cols-1 gap-6 px-5 pb-12 sm:px-8 lg:grid-cols-[180px_minmax(0,1fr)_340px]">
         {/* ==================================================
-            HEADER
+            LEFT — STEPS NAV
         ================================================== */}
 
-        <div className="px-0 pt-[10px]">
-
-          <p className="text-[12px] font-medium tracking-[1.5px] text-[#77736D]">
-            WELCOME TO SUPERBLOCK
-          </p>
-
-          <h1 className="mt-4 text-[40px] font-semibold leading-[46px] tracking-[-1.2px]">
-            Hey {userName || "there"},{" "}
-            <span className="text-[#3D4650]">
-              let's shape your workspace.
-            </span>
-          </h1>
-
-          <p className="mt-3 max-w-[800px] text-[15px] leading-[24px] text-[#555555]">
-            Five quick questions — about a minute. We'll use them
-            to pick channel defaults, suggest templates, and tune
-            the copy across the app so it speaks your business's
-            language from day one.
-          </p>
-
-        </div>
-
-        {/* ==================================================
-            MAIN CONTENT
-        ================================================== */}
-
-        <div className="mt-7 flex min-h-[620px] gap-[30px]">
-
-          {/* ==================================================
-              LEFT — STEPS
-          ================================================== */}
-
-          <aside className="w-[224px] shrink-0">
-
-            <div className="space-y-1">
-
+        <aside className="hidden lg:block">
+          <nav aria-label="Onboarding steps" className="sticky top-6">
+            <ul className="flex flex-col gap-1.5">
               {steps.map((step, index) => {
-
-                const completed = index === 0;
-                const active = index === 1;
+                const active = step.id === 2;
+                const completed = step.id < 2;
 
                 return (
-                  <div
-                    key={step.title}
-                    className={`relative flex h-[60px] items-center gap-3 rounded-[10px] px-3 ${
-                      active
-                        ? "border border-[#E2DFDA] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
-                        : "bg-transparent"
-                    }`}
-                  >
-
-                    {/* Vertical line */}
-
-                    {index < steps.length - 1 && (
-                      <div className="absolute left-[22px] top-[48px] h-[28px] w-px bg-[#E2DFDA]" />
-                    )}
-
-                    {/* Icon */}
-
+                  <li key={step.id}>
                     <div
-                      className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full ${
-                        completed
-                          ? "bg-[#075B48] text-white"
-                          : active
-                          ? "bg-[#7C3AED] text-white"
-                          : "bg-[#F3F2EF] text-[#C5C3BE]"
+                      className={`flex w-full items-center gap-2.5 rounded-[8px] px-2.5 py-2 text-left transition-all duration-[180ms] ${
+                        active
+                          ? "border border-[#E8E5DF] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                          : completed
+                          ? "cursor-pointer hover:bg-[#F5F4F0]"
+                          : "cursor-not-allowed opacity-50"
                       }`}
                     >
-                      <span className="text-[12px]">
+                      {/* Circle Icon */}
+                      <span
+                        className={`relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] transition-all duration-[200ms] ${
+                          completed
+                            ? "bg-[#064E3B] text-white"
+                            : active
+                            ? "bg-[#8B5CF6] text-white"
+                            : "bg-[#F5F4F0] text-[#8E8B85]"
+                        }`}
+                      >
                         {completed ? "✓" : step.icon}
                       </span>
+
+                      {/* Text */}
+                      <div className="min-w-0">
+                        <p
+                          className={`text-[12px] font-semibold leading-tight ${
+                            active ? "text-[#111111]" : "text-[#525252]"
+                          }`}
+                        >
+                          {step.title}
+                        </p>
+                        <p className="mt-0.5 text-[10.5px] leading-tight text-[#8E8B85]">
+                          {step.subtitle}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Text */}
-
-                    <div>
-
-                      <p
-                        className={`text-[14px] font-semibold ${
-                          active || completed
-                            ? "text-[#202020]"
-                            : "text-[#B5B2AC]"
-                        }`}
-                      >
-                        {step.title}
-                      </p>
-
-                      <p
-                        className={`mt-[1px] text-[12px] ${
-                          active || completed
-                            ? "text-[#8C8983]"
-                            : "text-[#C4C1BC]"
-                        }`}
-                      >
-                        {step.subtitle}
-                      </p>
-
-                    </div>
-
-                  </div>
+                    {/* Step Connector Line */}
+                    {index < steps.length - 1 && (
+                      <div
+                        aria-hidden
+                        className="my-0.5 ml-[18px] h-1.5 w-px bg-[#E8E5DF]"
+                      />
+                    )}
+                  </li>
                 );
               })}
+            </ul>
+          </nav>
+        </aside>
 
-            </div>
+        {/* ==================================================
+            CENTER — MAIN CARD
+        ================================================== */}
 
-          </aside>
+        <section className="min-w-0">
+          <div className="relative flex flex-col justify-between overflow-hidden rounded-[16px] border border-[#E8E5DF] bg-white shadow-sm">
+            {/* Top Accent Gradient Bar */}
+            <div
+              aria-hidden
+              className="h-[3px] w-full"
+              style={{
+                background:
+                  "linear-gradient(to right, #8B5CF6, rgba(139, 92, 246, 0.4) 35%, transparent)",
+              }}
+            />
 
-          {/* ==================================================
-              CENTER
-          ================================================== */}
-
-          <section className="min-w-0 flex-1">
-
-            <div className="relative h-full overflow-hidden rounded-[16px] border border-[#E1DED9] bg-white">
-
-              {/* Purple top border */}
-
-              <div className="h-[3px] w-full bg-[#7C3AED]" />
-
-              <div className="px-[42px] pt-[44px]">
-
-                {/* Step */}
-
-                <p className="text-[12px] font-medium tracking-[1.2px] text-[#98948D]">
+            <div className="p-6 sm:p-8 lg:p-9">
+              {/* Step Header */}
+              <div className="mb-6">
+                <p className="mb-1.5 text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#8E8B85]">
                   STEP 2 OF 5
                 </p>
 
-                {/* Heading */}
-
-                <h2 className="mt-4 text-[28px] font-semibold leading-[34px] tracking-[-0.8px] text-[#111111]">
+                <h2 className="text-[22px] font-semibold leading-[1.2] tracking-[-0.022em] text-[#111111]">
                   What will you send on Superblock?
                 </h2>
 
-                <p className="mt-2 max-w-[700px] text-[15px] leading-[24px] text-[#666666]">
-                  Pick everything that applies — we'll surface the
-                  right channels, templates, and automations on day
-                  one.
+                <p className="mt-1.5 max-w-[560px] text-[13.5px] leading-[1.5] text-[#525252]">
+                  Pick everything that applies — we'll surface the right
+                  channels, templates, and automations on day one.
                 </p>
+              </div>
 
-                {/* =================================================
-                    USE CASE GRID
-                ================================================= */}
+              {/* =============================================
+                  USE CASE GRID
+              ============================================= */}
 
-                <div className="mt-7 grid grid-cols-2 gap-[9px]">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {useCases.map((useCase) => {
+                  const isSelected =
+                    selectedUseCases.includes(useCase.id) ||
+                    selectedUseCases.includes(useCase.title);
 
-                  {useCases.map((useCase) => {
-
-                    const selected =
-                      selectedUseCases.includes(useCase.title);
-
-                    return (
-                      <button
-                        key={useCase.title}
-                        type="button"
-                        onClick={() =>
-                          toggleUseCase(useCase.title)
-                        }
-                        className={`relative flex min-h-[77px] items-center rounded-[10px] border p-3.5 text-left transition ${
-                          selected
-                            ? `${useCase.selectedBorder} shadow-[0_0_0_1px_rgba(0,0,0,0.02)]`
-                            : "border-[#E1DED9] bg-white hover:border-[#B8B4AD]"
-                        }`}
+                  return (
+                    <button
+                      key={useCase.id}
+                      type="button"
+                      onClick={() => toggleUseCase(useCase.id)}
+                      className={`relative flex items-start gap-3 rounded-[8px] border bg-white p-3.5 text-left transition-colors duration-[160ms] ${
+                        isSelected ? "shadow-sm" : "hover:bg-[#F5F4F0]"
+                      }`}
+                      style={{
+                        borderColor: isSelected ? useCase.accent : "#E8E5DF",
+                        boxShadow: isSelected
+                          ? `0 0 0 2px ${useCase.accent}24`
+                          : undefined,
+                      }}
+                    >
+                      {/* Icon */}
+                      <span
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] text-[15px]"
+                        style={{
+                          backgroundColor: isSelected
+                            ? useCase.accent
+                            : `${useCase.accent}1A`,
+                          color: isSelected ? "#FFFFFF" : useCase.accent,
+                        }}
                       >
+                        {useCase.icon}
+                      </span>
 
-                        {/* Icon */}
+                      {/* Text */}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[13.5px] font-semibold leading-tight text-[#111111]">
+                          {useCase.title}
+                        </p>
+                        <p className="mt-0.5 text-[11.5px] leading-[1.4] text-[#8E8B85]">
+                          {useCase.description}
+                        </p>
+                      </div>
 
-                        <div
-                          className={`flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[7px] text-[16px] ${useCase.bg} ${useCase.text}`}
+                      {/* Selected Check Badge */}
+                      {isSelected && (
+                        <span
+                          className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
+                          style={{ backgroundColor: useCase.accent }}
                         >
-                          {useCase.icon}
-                        </div>
-
-                        {/* Text */}
-
-                        <div className="ml-3 min-w-0">
-
-                          <p className="text-[15px] font-semibold text-[#161616]">
-                            {useCase.title}
-                          </p>
-
-                          <p className="mt-[2px] text-[12.5px] text-[#99958F]">
-                            {useCase.description}
-                          </p>
-
-                        </div>
-
-                        {/* Selected check */}
-
-                        {selected && (
-                          <div
-                            className={`absolute right-3.5 top-3.5 flex h-[19px] w-[19px] items-center justify-center rounded-full ${useCase.bg} ${useCase.text}`}
-                          >
-                            <span className="text-[11px] font-bold">
-                              ✓
-                            </span>
-                          </div>
-                        )}
-
-                      </button>
-                    );
-                  })}
-
-                </div>
-
-                {/* =================================================
-                    REUSABLE BOTTOM NAVIGATION
-                ================================================= */}
-
-                <OnboardingNavigation
-                  currentStep={2}
-                  nextPath="/scale"
-                  backPath="/onboarding"
-                  onContinue={() => {
-                    localStorage.setItem(
-                      "onboarding_use_cases",
-                      JSON.stringify({
-                        use_cases: selectedUseCases,
-                      })
-                    );
-                  }}
-                />
-
+                          <span className="text-[9px] font-bold leading-none text-white">
+                            ✓
+                          </span>
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
+              {/* Bottom Navigation */}
+              <OnboardingNavigation
+                currentStep={2}
+                nextPath="/scale"
+                backPath="/onboardingentry"
+                onContinue={() => {
+                  localStorage.setItem(
+                    "onboarding_use_cases",
+                    JSON.stringify({
+                      use_cases: selectedUseCases,
+                    })
+                  );
+                }}
+              />
             </div>
+          </div>
+        </section>
 
-          </section>
+        {/* ==================================================
+            RIGHT — LIVE PREVIEW ASIDE
+        ================================================== */}
 
-          {/* ==================================================
-              RIGHT — LIVE PREVIEW
-          ================================================== */}
-
-          <aside className="w-[425px] shrink-0">
-
-            <div className="rounded-[16px] border border-[#E1DED9] bg-white p-5">
-
-              {/* Preview heading */}
-
-              <div className="flex items-center justify-between">
-
-                <p className="text-[12px] font-semibold tracking-[1.1px] text-[#99958F]">
-                  LIVE PREVIEW
-                </p>
-
-                <div className="flex items-center gap-1.5 rounded-full bg-[#E9F2EF] px-2.5 py-1 text-[10px] font-medium text-[#176653]">
-
-                  <span className="h-[5px] w-[5px] rounded-full bg-[#087F63]" />
-
-                  updates as you answer
-
-                </div>
-
-              </div>
-
-              <p className="mt-2 text-[13px] leading-[20px] text-[#99958F]">
-                Your workspace stays calm and neutral — the colours
-                here on onboarding are just guideposts. Only the
-                wording and which tools unlock change per business.
+        <aside className="w-full shrink-0 self-start lg:sticky lg:top-6 lg:w-[340px]">
+          <div className="overflow-hidden rounded-[16px] border border-[#E8E5DF] bg-white p-4 shadow-sm">
+            {/* Header Row */}
+            <div className="mb-1 flex items-center justify-between">
+              <p className="text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#8E8B85]">
+                LIVE PREVIEW
               </p>
 
-              {/* =================================================
-                  MINI DASHBOARD
-              ================================================= */}
+              <div className="inline-flex h-[18px] items-center gap-1 rounded-full bg-[#E8F5EE] px-1.5 text-[10px] font-medium text-[#064E3B]">
+                <span className="h-1 w-1 rounded-full bg-[#064E3B]" />
+                updates as you answer
+              </div>
+            </div>
 
-              <div className="mt-5 overflow-hidden rounded-[10px] border border-[#DDD9D3]">
+            <p className="mb-3 text-[11px] leading-[1.45] text-[#8E8B85]">
+              Your workspace stays calm and neutral — the colours here on
+              onboarding are just guideposts. Only the{" "}
+              <span className="font-medium text-[#525252]">wording</span> and
+              which{" "}
+              <span className="font-medium text-[#525252]">tools unlock</span>{" "}
+              change per business.
+            </p>
 
-                {/* Browser bar */}
-
-                <div className="flex h-[34px] items-center justify-between border-b border-[#DDD9D3] px-3">
-
-                  <div className="flex gap-1.5">
-                    <span className="h-[7px] w-[7px] rounded-full bg-[#FF6257]" />
-                    <span className="h-[7px] w-[7px] rounded-full bg-[#FFBD2E]" />
-                    <span className="h-[7px] w-[7px] rounded-full bg-[#28C840]" />
-                  </div>
-
-                  <span className="text-[9px] text-[#88837D]">
-                    Superblock for ecommerce
-                  </span>
-
-                  <span className="h-[7px] w-[7px] rounded-full bg-[#12B886]" />
-
+            {/* Mini Dashboard Window */}
+            <div className="overflow-hidden rounded-[8px] border border-[#E8E5DF] bg-[#FAFAF8]">
+              {/* Browser Bar */}
+              <div className="flex h-7 items-center justify-between border-b border-[#E8E5DF] bg-white px-2">
+                <div className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#FF5F57]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#FEBC2E]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#28C840]" />
                 </div>
 
-                {/* Dashboard */}
+                <span className="truncate text-[9px] font-medium text-[#8E8B85]">
+                  Superblock for {industryTitle.toLowerCase()}
+                </span>
 
-                <div className="flex min-h-[235px]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
+              </div>
 
-                  {/* Sidebar */}
+              {/* Dashboard Preview Body */}
+              <div className="flex">
+                {/* Sidebar */}
+                <div className="flex w-[88px] flex-col gap-[3px] border-r border-[#E8E5DF] bg-white px-1.5 py-2">
+                  <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] bg-[#E8F5EE] px-1.5 text-[8.5px] font-semibold text-[#064E3B]">
+                    <span>⌂</span> Home
+                  </div>
+                  <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
+                    <span>♢</span> Inbox
+                  </div>
+                  <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
+                    <span>◇</span> Send
+                  </div>
+                  <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
+                    <span>♙</span> Customers
+                  </div>
+                  <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
+                    <span>⚒</span> Build
+                  </div>
+                  <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
+                    <span>◫</span> Insights
+                  </div>
+                </div>
 
-                  <div className="w-[95px] border-r border-[#E2DFDA] p-2">
-
-                    <div className="rounded-[5px] bg-[#E9F1EF] px-2 py-1.5 text-[9px] font-medium text-[#176653]">
-                      ⌂ &nbsp; Home
-                    </div>
-
-                    <div className="mt-1 px-2 py-1.5 text-[9px] text-[#77736D]">
-                      ♢ &nbsp; Inbox
-                    </div>
-
-                    <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
-                      ◇ &nbsp; Send
-                    </div>
-
-                    <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
-                      ♙ &nbsp; Contacts
-                    </div>
-
-                    <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
-                      ⚒ &nbsp; Build
-                    </div>
-
-                    <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
-                      ◫ &nbsp; Insights
-                    </div>
-
+                {/* Mini Content */}
+                <div className="min-w-0 flex-1 space-y-2 p-2.5">
+                  <div>
+                    <p className="truncate text-[10.5px] font-semibold leading-tight text-[#111111]">
+                      {userName ? `Welcome back, ${userName}` : "Welcome back"}
+                    </p>
+                    <p className="mt-0.5 truncate text-[9px] text-[#8E8B85]">
+                      Superblock for {industryTitle.toLowerCase()}
+                    </p>
                   </div>
 
-                  {/* Dashboard content */}
-
-                  <div className="flex-1 p-3">
-
-                    <h3 className="text-[12px] font-semibold">
-                      Welcome back, {userName || "Sana"}
-                    </h3>
-
-                    <p className="mt-1 text-[9px] text-[#99958F]">
-                      Superblock for ecommerce
+                  {/* Stat Card */}
+                  <div className="rounded-[6px] border border-[#E8E5DF] bg-white p-2">
+                    <p className="text-[8px] font-medium uppercase tracking-[0.06em] text-[#8E8B85]">
+                      CUSTOMERS REACHED THIS WEEK
                     </p>
 
-                    {/* Customers */}
-
-                    <div className="mt-3 rounded-[7px] border border-[#E2DFDA] p-2.5">
-
-                      <p className="text-[8px] font-medium text-[#99958F]">
-                        CUSTOMERS REACHED THIS WEEK
-                      </p>
-
-                      <div className="mt-1 flex items-center gap-2">
-
-                        <span className="text-[17px] font-semibold">
-                          1,284
-                        </span>
-
-                        <span className="rounded bg-[#E5F5ED] px-1 text-[7px] text-[#16805E]">
-                          +12%
-                        </span>
-
-                      </div>
-
-                      {/* Chart */}
-
-                      <div className="mt-3 flex h-[22px] items-end gap-1">
-
-                        {[8, 12, 9, 15, 10, 16, 13, 19, 14].map(
-                          (height, index) => (
-                            <div
-                              key={index}
-                              className={`flex-1 rounded-[2px] ${
-                                index === 8
-                                  ? "bg-[#075B48]"
-                                  : "bg-[#D8D8D5]"
-                              }`}
-                              style={{
-                                height: `${height}px`,
-                              }}
-                            />
-                          )
-                        )}
-
-                      </div>
-
+                    <div className="mt-1 flex items-baseline gap-1.5">
+                      <span className="text-[14px] font-semibold tabular-nums text-[#111111]">
+                        1,284
+                      </span>
+                      <span className="rounded-[3px] bg-[#E8F5EE] px-1 text-[8.5px] font-medium text-[#064E3B]">
+                        +12%
+                      </span>
                     </div>
 
-                    {/* Suggested */}
-
-                    <div className="mt-3 rounded-[7px] border border-[#BBD6CD] bg-[#EDF6F2] p-2.5">
-
-                      <div className="flex items-center gap-2">
-
-                        <div className="flex h-6 w-6 items-center justify-center rounded-[5px] bg-[#075B48] text-[10px] text-white">
-                          ✦
-                        </div>
-
-                        <div>
-
-                          <p className="text-[9px] font-semibold">
-                            Suggested: Abandoned-cart reco...
-                          </p>
-
-                          <p className="mt-0.5 text-[7px] text-[#77736D]">
-                            Tap to scaffold a flow for customers.
-                          </p>
-
-                        </div>
-
-                      </div>
-
+                    {/* Chart Bars */}
+                    <div className="mt-2 flex h-[18px] items-end gap-px">
+                      {[5, 9, 6, 11, 8, 12, 14, 10, 13, 15].map((h, i) => (
+                        <span
+                          key={i}
+                          className={`flex-1 rounded-[2px] ${
+                            i === 9 ? "bg-[#064E3B]" : "bg-[#8E8B85]/30"
+                          }`}
+                          style={{ height: `${(h / 15) * 100}%` }}
+                        />
+                      ))}
                     </div>
-
                   </div>
 
+                  {/* Suggested Card */}
+                  <div className="flex items-center gap-2 rounded-[6px] border border-[#064E3B]/15 bg-[#E8F5EE] p-2">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[4px] bg-[#064E3B] text-[10px] text-white">
+                      ✦
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[9.5px] font-semibold leading-tight text-[#111111]">
+                        Suggested: Abandoned-cart reco...
+                      </p>
+                      <p className="mt-0.5 truncate text-[8.5px] text-[#8E8B85]">
+                        Tap to scaffold a flow for customers.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-
               </div>
-
-              {/* =================================================
-                  ENGAGEMENT TOOLS
-              ================================================= */}
-
-              <div className="mt-4 rounded-[8px] border border-[#E1DED9] p-3">
-
-                <p className="text-[11px] font-semibold tracking-[0.5px] text-[#66615B]">
-                  ✣ &nbsp; ENGAGEMENT TOOLS UNLOCKED
-                </p>
-
-                <div className="mt-2 space-y-1.5">
-
-                  <p className="text-[11px] text-[#626262]">
-                    ✓ Automation studio
-                  </p>
-
-                  <p className="text-[11px] text-[#626262]">
-                    ✓ Offers
-                  </p>
-
-                  <p className="text-[11px] text-[#626262]">
-                    ✓ Onboarding sequences
-                  </p>
-
-                </div>
-
-              </div>
-
-              {/* =================================================
-                  PREVIEW DETAILS
-              ================================================= */}
-
-              <div className="mt-4 grid grid-cols-2 gap-y-4">
-
-                <PreviewItem
-                  label="INDUSTRY"
-                  value="Ecommerce & D2C"
-                />
-
-                <PreviewItem
-                  label="TONE"
-                  value="Superblock for ecommerce"
-                />
-
-                <PreviewItem
-                  label="CONTACTS CALLED"
-                  value="Customers"
-                />
-
-                <PreviewItem
-                  label="AUDIENCE AS"
-                  value="Segment"
-                />
-
-                <PreviewItem
-                  label="USE CASES"
-                  value={`${selectedUseCases.length} picked`}
-                />
-
-                <PreviewItem
-                  label="TEAM"
-                  value="—"
-                />
-
-              </div>
-
-              <p className="mt-5 text-[11px] text-[#99958F]">
-                Everything is editable in{" "}
-                <span className="font-semibold text-[#55514B]">
-                  Settings → Preferences
-                </span>{" "}
-                any time.
-              </p>
-
             </div>
 
-          </aside>
+            {/* Engagement Tools Unlocked Section */}
+            <div className="mt-3 rounded-[6px] border border-[#E8E5DF] bg-[#FAFAF8] p-2.5">
+              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#525252]">
+                ✦ Engagement tools unlocked
+              </p>
 
-        </div>
+              <ul className="space-y-[3px]">
+                <li className="flex items-center gap-1.5 text-[10.5px] text-[#525252]">
+                  <span className="text-[9px] font-bold text-[#064E3B]">✓</span>{" "}
+                  Automation studio
+                </li>
+                <li className="flex items-center gap-1.5 text-[10.5px] text-[#525252]">
+                  <span className="text-[9px] font-bold text-[#064E3B]">✓</span>{" "}
+                  Offers
+                </li>
+                <li className="flex items-center gap-1.5 text-[10.5px] text-[#525252]">
+                  <span className="text-[9px] font-bold text-[#064E3B]">✓</span>{" "}
+                  Onboarding sequences
+                </li>
+              </ul>
+            </div>
 
+            {/* Preview Specs Grid */}
+            <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5">
+              <PreviewSpec label="INDUSTRY" value={industryTitle} />
+              <PreviewSpec
+                label="TONE"
+                value={`Superblock for ${industryTitle.toLowerCase()}`}
+              />
+              <PreviewSpec label="CONTACTS CALLED" value="Customers" />
+              <PreviewSpec label="AUDIENCE AS" value="Segment" />
+              <PreviewSpec
+                label="USE CASES"
+                value={`${selectedUseCases.length} picked`}
+              />
+              <PreviewSpec label="TEAM" value="—" />
+            </dl>
+
+            {/* Footnote */}
+            <p className="mt-3 text-[10.5px] leading-[1.5] text-[#8E8B85]">
+              Everything is editable in{" "}
+              <span className="font-medium text-[#525252]">
+                Settings → Preferences
+              </span>{" "}
+              any time.
+            </p>
+          </div>
+        </aside>
       </main>
-    </>
+    </div>
   );
 }
 
-/* ============================================================
-   PREVIEW ITEM
-============================================================ */
-
-function PreviewItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function PreviewSpec({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-
-      <p className="text-[10px] font-medium tracking-[0.7px] text-[#99958F]">
+    <div className="min-w-0">
+      <dt className="text-[9.5px] font-medium uppercase tracking-[0.06em] text-[#8E8B85]">
         {label}
-      </p>
-
-      <p className="mt-1 text-[13px] font-medium text-[#202020]">
+      </dt>
+      <dd className="mt-0.5 truncate text-[11.5px] font-medium text-[#111111]">
         {value}
-      </p>
-
+      </dd>
     </div>
   );
 }

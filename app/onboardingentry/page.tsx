@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import OnboardingHeader from "../components/tempHeader";
-import OnboardingNavigation from "../components/comonboarding/page";
+import OnboardingHeader from "@/components/OnboardingHeader";
+import OnboardingNavigation from "@/components/OnboardingNavigation";
 
 import {
   FaBuilding,
@@ -13,736 +13,646 @@ import {
 } from "react-icons/fa";
 
 /* ============================================================
-   INDUSTRIES
+   INDUSTRIES WITH EXACT ACCENTS & DATA
 ============================================================ */
 
 const industries = [
   {
+    id: "ecommerce",
     title: "Ecommerce & D2C",
     description: "Shopify, WooCommerce, marketplaces.",
-    letter: "$",
-    bg: "bg-[#F0E8FF]",
-    text: "text-[#7C3AED]",
+    glyph: "$",
+    accent: "#7C3AED",
+    examples: ["Fashion", "Beauty", "Home", "Electronics", "Food & beverage"],
   },
   {
+    id: "saas",
     title: "SaaS & Software",
     description: "B2B + B2C software products.",
-    letter: "S",
-    bg: "bg-[#E5F5FC]",
-    text: "text-[#009FE3]",
+    glyph: "S",
+    accent: "#0EA5E9",
+    examples: ["Productivity", "Devtools", "Analytics", "Vertical SaaS"],
   },
   {
+    id: "education",
     title: "Education & Coaching",
     description: "Coaches, academies, EdTech.",
-    letter: "E",
-    bg: "bg-[#FFF1DC]",
-    text: "text-[#E98A00]",
+    glyph: "E",
+    accent: "#F59E0B",
+    examples: ["K-12", "Higher-ed", "Skills bootcamp", "Coaching"],
   },
   {
+    id: "creator",
     title: "Creator & Community",
     description: "Solo creators, podcasts, communities.",
-    letter: "C",
-    bg: "bg-[#FFE9ED]",
-    text: "text-[#F43F5E]",
+    glyph: "C",
+    accent: "#F43F5E",
+    examples: ["Newsletter", "Podcast", "YouTube", "Community"],
   },
   {
+    id: "healthcare",
     title: "Healthcare & Wellness",
     description: "Clinics, telehealth, fitness.",
-    letter: "+",
-    bg: "bg-[#DDF7EE]",
-    text: "text-[#10B981]",
+    glyph: "+",
+    accent: "#10B981",
+    examples: ["Clinics", "Wellness", "Telehealth", "Pharma"],
   },
   {
+    id: "real_estate",
     title: "Real Estate & Property",
     description: "Brokers, developers, PropTech.",
-    letter: "R",
-    bg: "bg-[#EDEBFF]",
-    text: "text-[#6366F1]",
+    glyph: "R",
+    accent: "#6366F1",
+    examples: ["Residential", "Commercial", "Rentals", "PropTech"],
   },
   {
+    id: "financial_services",
     title: "Financial Services",
     description: "FinTech, lending, insurance.",
-    letter: "F",
-    bg: "bg-[#EEF0F2]",
-    text: "text-[#475569]",
+    glyph: "F",
+    accent: "#475569",
+    examples: ["FinTech", "Insurance", "Wealth", "Lending"],
   },
   {
+    id: "agency",
     title: "Agency & Reseller",
     description: "Marketing, ads, BSP resellers.",
-    letter: "A",
-    bg: "bg-[#FFF0E4]",
-    text: "text-[#F97316]",
+    glyph: "A",
+    accent: "#F97316",
+    examples: ["Marketing", "Performance", "Branding", "Ops"],
   },
   {
+    id: "hospitality",
     title: "Hospitality & F&B",
     description: "Restaurants, hotels, events.",
-    letter: "H",
-    bg: "bg-[#FDE8F4]",
-    text: "text-[#EC4899]",
+    glyph: "H",
+    accent: "#EC4899",
+    examples: ["Restaurants", "Hotels", "Events", "Travel"],
   },
   {
+    id: "logistics",
     title: "Logistics & Delivery",
     description: "Shipping, delivery, fleet.",
-    letter: "L",
-    bg: "bg-[#E5F7FC]",
-    text: "text-[#0891B2]",
+    glyph: "L",
+    accent: "#06B6D4",
+    examples: ["3PL", "Last-mile", "Fleet", "Cross-border"],
   },
   {
+    id: "nonprofit",
     title: "Nonprofit & NGO",
     description: "Foundations, charities, advocacy.",
-    letter: "N",
-    bg: "bg-[#F8E8FF]",
-    text: "text-[#A855F7]",
+    glyph: "N",
+    accent: "#D946EF",
+    examples: ["Education", "Healthcare", "Environment", "Advocacy"],
   },
   {
+    id: "manufacturing",
     title: "Manufacturing & B2B",
     description: "Industrial, supply, wholesale.",
-    letter: "M",
-    bg: "bg-[#F0F0EE]",
-    text: "text-[#555555]",
+    glyph: "M",
+    accent: "#78716C",
+    examples: ["Industrial", "Wholesale", "Supply chain"],
   },
   {
+    id: "other",
     title: "Something else",
     description: "We support every industry.",
-    letter: "…",
-    bg: "bg-[#F3F1ED]",
-    text: "text-[#6B665F]",
+    glyph: "…",
+    accent: "#525252",
+    examples: [],
   },
 ];
 
 /* ============================================================
-   CLOSEST MATCH OPTIONS
-============================================================ */
-
-const closestMatches = [
-  "Industrial",
-  "Wholesale",
-  "Supply chain",
-];
-
-/* ============================================================
-   ONBOARDING STEPS
+   STEPS
 ============================================================ */
 
 const steps = [
   {
+    id: 1,
     title: "Industry",
     subtitle: "Pick your industry",
     icon: <FaBuilding />,
   },
   {
+    id: 2,
     title: "Use cases",
     subtitle: "What you'll send",
     icon: <FaMagic />,
   },
   {
+    id: 3,
     title: "Scale",
     subtitle: "Team & volume",
     icon: <FaChartBar />,
   },
   {
+    id: 4,
     title: "Discovery",
     subtitle: "How you found us",
     icon: <FaCompass />,
   },
   {
+    id: 5,
     title: "Context",
-    subtitle: "Notes & docs",
+    subtitle: "Workspace notes",
     icon: <FaStar />,
   },
 ];
 
-/* ============================================================
-   PAGE
-============================================================ */
-
-export default function OnboardingPage() {
-  const [selectedIndustry, setSelectedIndustry] = useState("");
+export default function OnboardingIndustryPage() {
+  const [selectedIndustry, setSelectedIndustry] = useState("ecommerce");
   const [closestMatch, setClosestMatch] = useState("");
   const [userName, setUserName] = useState("");
 
   /* ==========================================================
-     GET USER NAME FROM LOCAL STORAGE
+     LOAD SAVED USER
   ========================================================== */
 
   useEffect(() => {
     const savedUser = localStorage.getItem("signup_user");
-
-    if (!savedUser) return;
-
-    try {
-      const user = JSON.parse(savedUser);
-
-      if (user.full_name) {
-        setUserName(user.full_name);
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        if (user.full_name) {
+          setUserName(user.full_name);
+        }
+      } catch (error) {
+        console.error("Failed to read signup user:", error);
       }
-    } catch (error) {
-      console.error("Failed to read signup user:", error);
+    }
+
+    const savedIndustry = localStorage.getItem("onboarding_industry");
+    if (savedIndustry) {
+      try {
+        const data = JSON.parse(savedIndustry);
+        if (data.industry) setSelectedIndustry(data.industry);
+        if (data.closest_match) setClosestMatch(data.closest_match);
+      } catch (error) {
+        console.error("Failed to read industry data:", error);
+      }
     }
   }, []);
 
-  /* ==========================================================
-     INDUSTRY SELECT
-  ========================================================== */
-
-  const handleIndustrySelect = (industry: string) => {
-    setSelectedIndustry(industry);
-  };
-
-  /* ==========================================================
-     CLOSEST MATCH SELECT
-  ========================================================== */
-
-  const handleClosestMatch = (match: string) => {
-    setClosestMatch(match);
-  };
+  const currentObj =
+    industries.find(
+      (i) => i.id === selectedIndustry || i.title === selectedIndustry
+    ) || industries[0];
+  const activeAccent = currentObj.accent || "#7C3AED";
 
   return (
-    <>
+    <div className="relative min-h-dvh overflow-hidden bg-[#FAFAF8] text-[#111111]">
       <OnboardingHeader />
 
-      <main className="min-h-screen bg-[#FAFAF8] text-[#111111]">
+      {/* Background glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full opacity-[0.18] blur-3xl transition-colors duration-[600ms]"
+        style={{ backgroundColor: activeAccent }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-44 -left-32 h-[420px] w-[420px] rounded-full opacity-[0.10] blur-3xl"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(6, 78, 59, 0.35) 0%, transparent 70%)",
+        }}
+      />
 
-        {/* ====================================================
-            HEADER
-        ==================================================== */}
+      {/* ====================================================
+          PAGE HEADER
+      ==================================================== */}
 
-        <div className="px-0 pt-[10px]">
+      <section className="relative mx-auto px-5 pb-4 pt-8 sm:px-8 sm:pb-5 sm:pt-10">
+        <p className="mb-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-[#8E8B85]">
+          WELCOME TO SUPERBLOCK
+        </p>
 
-          <p className="text-[12px] font-medium tracking-[1.5px] text-[#77736D]">
-            WELCOME TO SUPERBLOCK
-          </p>
+        <h1 className="max-w-[720px] text-[28px] font-semibold leading-[1.05] tracking-[-0.028em] text-[#111111] sm:text-[32px]">
+          {userName ? `Hey ${userName}, ` : "Hey there, "}
+          <span className="font-medium text-[#525252]">
+            let's shape your workspace.
+          </span>
+        </h1>
 
-          <h1 className="mt-4 text-[40px] font-semibold leading-[46px] tracking-[-1.2px]">
-            Hey {userName || "there"},{" "}
-            <span className="text-[#3D4650]">
-              let's shape your workspace.
-            </span>
-          </h1>
+        <p className="mt-2.5 max-w-[640px] text-[13.5px] leading-[1.55] text-[#525252]">
+          Five quick questions — about a minute. We'll use them to pick channel
+          defaults, suggest templates, and tune the copy across the app so it
+          speaks your business's language from day one.
+        </p>
+      </section>
 
-          <p className="mt-3 max-w-[800px] text-[15px] leading-[24px] text-[#555555]">
-            Five quick questions — about a minute. We'll use them to pick
-            channel defaults, suggest templates, and tune the copy across
-            the app so it speaks your business's language from day one.
-          </p>
+      {/* ====================================================
+          MAIN 3-COLUMN LAYOUT
+      ==================================================== */}
 
-        </div>
+      <main className="relative mx-auto grid grid-cols-1 gap-6 px-5 pb-12 sm:px-8 lg:grid-cols-[180px_minmax(0,1fr)_340px]">
+        {/* ==================================================
+            LEFT — STEPS NAV
+        ================================================== */}
 
-        {/* ====================================================
-            MAIN CONTENT
-        ==================================================== */}
-
-        <div className="mt-7 flex min-h-[620px] gap-[30px]">
-
-          {/* ==================================================
-              LEFT STEPS
-          ================================================== */}
-
-          <aside className="w-[224px] shrink-0">
-
-            <div className="space-y-1">
-
+        <aside className="hidden lg:block">
+          <nav aria-label="Onboarding steps" className="sticky top-6">
+            <ul className="flex flex-col gap-1.5">
               {steps.map((step, index) => {
-
-                const active = index === 0;
+                const active = step.id === 1;
+                const completed = step.id < 1;
 
                 return (
-                  <div
-                    key={step.title}
-                    className={`relative flex h-[60px] items-center gap-3 rounded-[10px] px-3 ${
-                      active
-                        ? "border border-[#E2DFDA] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
-                        : "bg-transparent"
-                    }`}
-                  >
-
-                    {/* Vertical line */}
-
-                    {index < steps.length - 1 && (
-                      <div className="absolute left-[22px] top-[48px] h-[28px] w-px bg-[#E2DFDA]" />
-                    )}
-
-                    {/* Icon */}
-
+                  <li key={step.id}>
                     <div
-                      className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full ${
+                      className={`flex w-full items-center gap-2.5 rounded-[8px] px-2.5 py-2 text-left transition-all duration-[180ms] ${
                         active
-                          ? "bg-[#075B48] text-white"
-                          : "bg-[#F3F2EF] text-[#C5C3BE]"
+                          ? "border border-[#E8E5DF] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                          : completed
+                          ? "cursor-pointer hover:bg-[#F5F4F0]"
+                          : "cursor-not-allowed opacity-50"
                       }`}
                     >
-                      <span className="text-[12px]">
-                        {step.icon}
+                      {/* Circle Icon */}
+                      <span
+                        className={`relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] transition-all duration-[200ms] ${
+                          active
+                            ? "text-white"
+                            : completed
+                            ? "bg-[#064E3B] text-white"
+                            : "bg-[#F5F4F0] text-[#8E8B85]"
+                        }`}
+                        style={
+                          active ? { backgroundColor: activeAccent } : undefined
+                        }
+                      >
+                        {completed ? "✓" : step.icon}
                       </span>
+
+                      {/* Text */}
+                      <div className="min-w-0">
+                        <p
+                          className={`text-[12px] font-semibold leading-tight ${
+                            active ? "text-[#111111]" : "text-[#525252]"
+                          }`}
+                        >
+                          {step.title}
+                        </p>
+                        <p className="mt-0.5 text-[10.5px] leading-tight text-[#8E8B85]">
+                          {step.subtitle}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Text */}
-
-                    <div>
-
-                      <p
-                        className={`text-[14px] font-semibold ${
-                          active
-                            ? "text-[#202020]"
-                            : "text-[#B5B2AC]"
-                        }`}
-                      >
-                        {step.title}
-                      </p>
-
-                      <p
-                        className={`mt-[1px] text-[12px] ${
-                          active
-                            ? "text-[#8C8983]"
-                            : "text-[#C4C1BC]"
-                        }`}
-                      >
-                        {step.subtitle}
-                      </p>
-
-                    </div>
-
-                  </div>
+                    {/* Step Connector Line */}
+                    {index < steps.length - 1 && (
+                      <div
+                        aria-hidden
+                        className="my-0.5 ml-[18px] h-1.5 w-px bg-[#E8E5DF]"
+                      />
+                    )}
+                  </li>
                 );
               })}
+            </ul>
+          </nav>
+        </aside>
 
-            </div>
+        {/* ==================================================
+            CENTER — MAIN CARD
+        ================================================== */}
 
-          </aside>
+        <section className="min-w-0">
+          <div className="relative flex flex-col justify-between overflow-hidden rounded-[16px] border border-[#E8E5DF] bg-white shadow-sm">
+            {/* Top Accent Gradient Bar */}
+            <div
+              aria-hidden
+              className="h-[3px] w-full transition-colors duration-[400ms]"
+              style={{
+                background: `linear-gradient(to right, ${activeAccent}, ${activeAccent}66 35%, transparent)`,
+              }}
+            />
 
-          {/* ==================================================
-              CENTER
-          ================================================== */}
-
-          <section className="min-w-0 flex-1">
-
-            <div className="relative overflow-hidden rounded-[16px] border border-[#E1DED9] bg-white">
-
-              {/* Purple top border */}
-
-              <div className="h-[3px] w-full bg-[#7C3AED]" />
-
-              <div className="px-[42px] pt-[44px]">
-
-                {/* Step */}
-
-                <p className="text-[12px] font-medium tracking-[1.2px] text-[#98948D]">
+            <div className="p-6 sm:p-8 lg:p-9">
+              {/* Step Header */}
+              <div className="mb-6">
+                <p className="mb-1.5 text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#8E8B85]">
                   STEP 1 OF 5
                 </p>
 
-                {/* Heading */}
-
-                <h2 className="mt-4 text-[28px] font-semibold leading-[34px] tracking-[-0.8px] text-[#111111]">
+                <h2 className="text-[22px] font-semibold leading-[1.2] tracking-[-0.022em] text-[#111111]">
                   What kind of business are you running?
                 </h2>
 
-                <p className="mt-2 max-w-[650px] text-[15px] leading-[24px] text-[#666666]">
+                <p className="mt-1.5 max-w-[560px] text-[13.5px] leading-[1.5] text-[#525252]">
                   We'll personalise your workspace copy, suggested templates,
                   and starter automations to match.
                 </p>
+              </div>
 
-                {/* =================================================
-                    INDUSTRY GRID
-                ================================================= */}
+              {/* =============================================
+                  INDUSTRY GRID
+              ============================================= */}
 
-                <div className="mt-7 grid grid-cols-3 gap-[10px]">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {industries.map((ind) => {
+                  const isSelected =
+                    selectedIndustry === ind.id ||
+                    selectedIndustry === ind.title;
 
-                  {industries.map((industry) => {
+                  return (
+                    <button
+                      key={ind.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedIndustry(ind.id);
+                        setClosestMatch("");
+                      }}
+                      className={`relative overflow-hidden rounded-[8px] border p-3.5 text-left transition-all duration-[160ms] ${
+                        isSelected
+                          ? "bg-white shadow-sm"
+                          : "bg-white hover:bg-[#F5F4F0]"
+                      }`}
+                      style={{
+                        borderColor: isSelected ? ind.accent : "#E8E5DF",
+                        boxShadow: isSelected
+                          ? `0 0 0 2px ${ind.accent}26`
+                          : undefined,
+                      }}
+                    >
+                      {/* Top Soft Tint Glow */}
+                      {isSelected && (
+                        <span
+                          aria-hidden
+                          className="pointer-events-none absolute inset-x-0 top-0 h-[80px]"
+                          style={{
+                            background: `linear-gradient(to bottom, ${ind.accent}14, transparent)`,
+                          }}
+                        />
+                      )}
 
-                    const selected =
-                      selectedIndustry === industry.title;
+                      {/* Header Row */}
+                      <div className="relative mb-1.5 flex items-center gap-2">
+                        <span
+                          className="flex h-7 w-7 items-center justify-center rounded-[6px] text-[12px] font-bold tabular-nums"
+                          style={{
+                            backgroundColor: isSelected
+                              ? ind.accent
+                              : `${ind.accent}1A`,
+                            color: isSelected ? "#FFFFFF" : ind.accent,
+                          }}
+                        >
+                          {ind.glyph}
+                        </span>
 
-                    return (
-                      <button
-                        key={industry.title}
-                        type="button"
-                        onClick={() =>
-                          handleIndustrySelect(industry.title)
-                        }
-                        className={`group min-h-[100px] rounded-[10px] border p-4 text-left transition ${
-                          selected
-                            ? "border-[#075B48] bg-[#F7FBF9] shadow-[0_0_0_1px_#075B48]"
-                            : "border-[#E1DED9] bg-white hover:border-[#B8B4AD] hover:bg-[#FCFCFB]"
-                        }`}
-                      >
+                        <span className="truncate text-[13.5px] font-semibold text-[#111111]">
+                          {ind.title}
+                        </span>
+                      </div>
 
-                        <div className="flex items-center gap-3">
+                      {/* Description */}
+                      <p className="relative text-[11.5px] leading-[1.4] text-[#8E8B85]">
+                        {ind.description}
+                      </p>
 
-                          <div
-                            className={`flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[7px] text-[16px] font-medium ${industry.bg} ${industry.text}`}
-                          >
-                            {industry.letter}
-                          </div>
+                      {/* Check badge */}
+                      {isSelected && (
+                        <span
+                          className="absolute right-2 top-2 flex h-4 w-4 items-center justify-center rounded-full"
+                          style={{ backgroundColor: ind.accent }}
+                        >
+                          <span className="text-[9px] font-bold leading-none text-white">
+                            ✓
+                          </span>
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
 
-                          <p className="text-[15px] font-semibold text-[#161616]">
-                            {industry.title}
-                          </p>
+              {/* =============================================
+                  CLOSEST MATCH SECTION
+              ============================================= */}
 
-                        </div>
-
-                        <p className="mt-3 text-[13px] leading-[18px] text-[#99958F]">
-                          {industry.description}
-                        </p>
-
-                      </button>
-                    );
-                  })}
-
-                </div>
-
-                {/* =================================================
-                    CLOSEST MATCH
-                ================================================= */}
-
-                <div className="mt-6 border-t border-[#E8E5E0] pt-5">
-
-                  <div className="flex items-center justify-between">
-
-                    <h3 className="text-[15px] font-semibold text-[#202020]">
-                      Pick the closest match (optional)
-                    </h3>
-
-                    <span className="text-[11px] font-medium text-[#AAA69F]">
-                      OPTIONAL
+              {currentObj.examples && currentObj.examples.length > 0 && (
+                <div className="mt-6">
+                  <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.08em] text-[#8E8B85]">
+                    Pick the closest match{" "}
+                    <span className="ml-1.5 text-[10px] font-medium normal-case text-[#8E8B85]/70">
+                      (optional)
                     </span>
+                  </p>
 
-                  </div>
-
-                  {/* Closest match options */}
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-
-                    {closestMatches.map((match) => {
-
-                      const selected =
-                        closestMatch === match;
+                  <div className="flex flex-wrap gap-1.5">
+                    {currentObj.examples.map((example) => {
+                      const isMatch = closestMatch === example;
 
                       return (
                         <button
-                          key={match}
+                          key={example}
                           type="button"
                           onClick={() =>
-                            handleClosestMatch(match)
+                            setClosestMatch(isMatch ? "" : example)
                           }
-                          className={`rounded-[8px] border px-4 py-2.5 text-[13px] font-medium transition ${
-                            selected
-                              ? "border-[#075B48] bg-[#F0F8F5] text-[#075B48] shadow-[0_0_0_1px_#075B48]"
-                              : "border-[#E1DED9] bg-white text-[#55514B] hover:border-[#B8B4AD] hover:bg-[#FCFCFB]"
-                          }`}
+                          className="h-7 rounded-full border px-2.5 text-[12px] font-medium transition-colors duration-[140ms]"
+                          style={{
+                            backgroundColor: isMatch ? activeAccent : "white",
+                            color: isMatch ? "#FFFFFF" : "#525252",
+                            borderColor: isMatch ? activeAccent : "#E8E5DF",
+                          }}
                         >
-                          {match}
+                          {example}
                         </button>
                       );
-
                     })}
-
                   </div>
-
                 </div>
+              )}
 
-              </div>
-
-              {/* =================================================
-                  SHARED ONBOARDING NAVIGATION
-              ================================================= */}
-
+              {/* Bottom Navigation */}
               <OnboardingNavigation
                 currentStep={1}
                 nextPath="/usecases"
-                backPath="/signup"
+                backPath="/signup/business"
                 onContinue={() => {
                   localStorage.setItem(
                     "onboarding_industry",
                     JSON.stringify({
                       industry: selectedIndustry,
                       closest_match: closestMatch,
+                      title: currentObj.title,
+                      accent: currentObj.accent,
                     })
                   );
                 }}
               />
-
             </div>
+          </div>
+        </section>
 
-          </section>
+        {/* ==================================================
+            RIGHT — LIVE PREVIEW ASIDE
+        ================================================== */}
 
-          {/* ==================================================
-              RIGHT LIVE PREVIEW
-          ================================================== */}
-
-          <aside className="w-[425px] shrink-0">
-
-            <div className="rounded-[16px] border border-[#E1DED9] bg-white p-5">
-
-              {/* Preview heading */}
-
-              <div className="flex items-center justify-between">
-
-                <p className="text-[12px] font-semibold tracking-[1.1px] text-[#99958F]">
-                  LIVE PREVIEW
-                </p>
-
-                <div className="flex items-center gap-1.5 rounded-full bg-[#E9F2EF] px-2.5 py-1 text-[10px] font-medium text-[#176653]">
-
-                  <span className="h-[5px] w-[5px] rounded-full bg-[#087F63]" />
-
-                  updates as you answer
-
-                </div>
-
-              </div>
-
-              <p className="mt-2 text-[13px] leading-[20px] text-[#99958F]">
-                Your workspace stays calm and neutral — the colours here
-                on onboarding are just guideposts. Only the wording and
-                which tools unlock change per business.
+        <aside className="w-full shrink-0 self-start lg:sticky lg:top-6 lg:w-[340px]">
+          <div className="overflow-hidden rounded-[16px] border border-[#E8E5DF] bg-white p-4 shadow-sm">
+            {/* Header Row */}
+            <div className="mb-1 flex items-center justify-between">
+              <p className="text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#8E8B85]">
+                LIVE PREVIEW
               </p>
 
-              {/* =================================================
-                  MINI DASHBOARD
-              ================================================= */}
+              <div className="inline-flex h-[18px] items-center gap-1 rounded-full bg-[#E8F5EE] px-1.5 text-[10px] font-medium text-[#064E3B]">
+                <span className="h-1 w-1 rounded-full bg-[#064E3B]" />
+                updates as you answer
+              </div>
+            </div>
 
-              <div className="mt-5 overflow-hidden rounded-[10px] border border-[#DDD9D3]">
+            <p className="mb-3 text-[11px] leading-[1.45] text-[#8E8B85]">
+              Your workspace stays calm and neutral — the colours here on
+              onboarding are just guideposts. Only the{" "}
+              <span className="font-medium text-[#525252]">wording</span> and
+              which{" "}
+              <span className="font-medium text-[#525252]">tools unlock</span>{" "}
+              change per business.
+            </p>
 
-                {/* Browser bar */}
-
-                <div className="flex h-[34px] items-center justify-between border-b border-[#DDD9D3] px-3">
-
-                  <div className="flex gap-1.5">
-
-                    <span className="h-[7px] w-[7px] rounded-full bg-[#FF6257]" />
-
-                    <span className="h-[7px] w-[7px] rounded-full bg-[#FFBD2E]" />
-
-                    <span className="h-[7px] w-[7px] rounded-full bg-[#28C840]" />
-
-                  </div>
-
-                  <span className="text-[9px] text-[#88837D]">
-                    Superblock for business
-                  </span>
-
-                  <span className="h-[7px] w-[7px] rounded-full bg-[#12B886]" />
-
+            {/* Mini Dashboard Window */}
+            <div className="overflow-hidden rounded-[8px] border border-[#E8E5DF] bg-[#FAFAF8]">
+              {/* Browser Bar */}
+              <div className="flex h-7 items-center justify-between border-b border-[#E8E5DF] bg-white px-2">
+                <div className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#FF5F57]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#FEBC2E]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#28C840]" />
                 </div>
 
-                {/* Dashboard */}
+                <span className="truncate text-[9px] font-medium text-[#8E8B85]">
+                  Superblock for {currentObj.title.toLowerCase()}
+                </span>
 
-                <div className="flex min-h-[235px]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
+              </div>
 
-                  {/* Sidebar */}
+              {/* Dashboard Preview Body */}
+              <div className="flex">
+                {/* Mini Sidebar */}
+                <div className="flex w-[88px] flex-col gap-[3px] border-r border-[#E8E5DF] bg-white px-1.5 py-2">
+                  <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] bg-[#E8F5EE] px-1.5 text-[8.5px] font-semibold text-[#064E3B]">
+                    <span>⌂</span> Home
+                  </div>
+                  <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
+                    <span>♢</span> Inbox
+                  </div>
+                  <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
+                    <span>◇</span> Send
+                  </div>
+                  <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
+                    <span>♙</span> Contacts
+                  </div>
+                  <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
+                    <span>⚒</span> Build
+                  </div>
+                  <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
+                    <span>◫</span> Insights
+                  </div>
+                </div>
 
-                  <div className="w-[95px] border-r border-[#E2DFDA] p-2">
-
-                    <div className="rounded-[5px] bg-[#E9F1EF] px-2 py-1.5 text-[9px] font-medium text-[#176653]">
-                      ⌂ &nbsp; Home
-                    </div>
-
-                    <div className="mt-1 px-2 py-1.5 text-[9px] text-[#77736D]">
-                      ♢ &nbsp; Inbox
-                    </div>
-
-                    <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
-                      ◇ &nbsp; Send
-                    </div>
-
-                    <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
-                      ♙ &nbsp; Contacts
-                    </div>
-
-                    <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
-                      ⚒ &nbsp; Build
-                    </div>
-
-                    <div className="px-2 py-1.5 text-[9px] text-[#77736D]">
-                      ◫ &nbsp; Insights
-                    </div>
-
+                {/* Mini Content */}
+                <div className="min-w-0 flex-1 space-y-2 p-2.5">
+                  <div>
+                    <p className="truncate text-[10.5px] font-semibold leading-tight text-[#111111]">
+                      {userName ? `Welcome back, ${userName}` : "Welcome back"}
+                    </p>
+                    <p className="mt-0.5 truncate text-[9px] text-[#8E8B85]">
+                      Superblock for {currentObj.title.toLowerCase()}
+                    </p>
                   </div>
 
-                  {/* Dashboard content */}
-
-                  <div className="flex-1 p-3">
-
-                    <h3 className="text-[12px] font-semibold">
-                      Welcome back, {userName || "Sana"}
-                    </h3>
-
-                    <p className="mt-1 text-[9px] text-[#99958F]">
-                      {selectedIndustry
-                        ? `Workspace for ${selectedIndustry}`
-                        : "Pick an industry to begin"}
+                  {/* Stat Card */}
+                  <div className="rounded-[6px] border border-[#E8E5DF] bg-white p-2">
+                    <p className="text-[8px] font-medium uppercase tracking-[0.06em] text-[#8E8B85]">
+                      CONTACTS REACHED THIS WEEK
                     </p>
 
-                    {/* Contacts */}
-
-                    <div className="mt-3 rounded-[7px] border border-[#E2DFDA] p-2.5">
-
-                      <p className="text-[8px] font-medium text-[#99958F]">
-                        CONTACTS REACHED THIS WEEK
-                      </p>
-
-                      <div className="mt-1 flex items-center justify-between">
-
-                        <span className="text-[17px] font-semibold">
-                          1,284
-                        </span>
-
-                        <span className="rounded bg-[#E5F5ED] px-1 text-[7px] text-[#16805E]">
-                          +12%
-                        </span>
-
-                      </div>
-
-                      {/* Chart */}
-
-                      <div className="mt-3 flex h-[22px] items-end gap-1">
-
-                        {[8, 12, 9, 15, 10, 16, 13, 19, 14].map(
-                          (height, index) => (
-                            <div
-                              key={index}
-                              className={`flex-1 rounded-[2px] ${
-                                index === 8
-                                  ? "bg-[#075B48]"
-                                  : "bg-[#D8D8D5]"
-                              }`}
-                              style={{
-                                height: `${height}px`,
-                              }}
-                            />
-                          )
-                        )}
-
-                      </div>
-
+                    <div className="mt-1 flex items-baseline gap-1.5">
+                      <span className="text-[14px] font-semibold tabular-nums text-[#111111]">
+                        1,284
+                      </span>
+                      <span className="rounded-[3px] bg-[#E8F5EE] px-1 text-[8.5px] font-medium text-[#064E3B]">
+                        +12%
+                      </span>
                     </div>
 
-                    {/* Suggested message */}
-
-                    <div className="mt-3 rounded-[7px] border border-[#BBD6CD] bg-[#EDF6F2] p-2.5">
-
-                      <div className="flex items-center gap-2">
-
-                        <div className="flex h-6 w-6 items-center justify-center rounded-[5px] bg-[#075B48] text-[10px] text-white">
-                          ✦
-                        </div>
-
-                        <div>
-
-                          <p className="text-[9px] font-semibold">
-                            Suggested: Abandoned-cart reco...
-                          </p>
-
-                          <p className="mt-0.5 text-[7px] text-[#77736D]">
-                            Tap to scaffold a flow for contacts.
-                          </p>
-
-                        </div>
-
-                      </div>
-
+                    {/* Chart Bars */}
+                    <div className="mt-2 flex h-[18px] items-end gap-px">
+                      {[5, 9, 6, 11, 8, 12, 14, 10, 13, 15].map((h, i) => (
+                        <span
+                          key={i}
+                          className={`flex-1 rounded-[2px] ${
+                            i === 9 ? "bg-[#064E3B]" : "bg-[#8E8B85]/30"
+                          }`}
+                          style={{ height: `${(h / 15) * 100}%` }}
+                        />
+                      ))}
                     </div>
-
                   </div>
 
+                  {/* Suggested Card */}
+                  <div className="flex items-center gap-2 rounded-[6px] border border-[#064E3B]/15 bg-[#E8F5EE] p-2">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[4px] bg-[#064E3B] text-[10px] text-white">
+                      ✦
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[9.5px] font-semibold leading-tight text-[#111111]">
+                        Suggested: Abandoned-cart reco...
+                      </p>
+                      <p className="mt-0.5 truncate text-[8.5px] text-[#8E8B85]">
+                        Tap to scaffold a flow for contacts.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-
               </div>
-
-              {/* =================================================
-                  PREVIEW DETAILS
-              ================================================= */}
-
-              <div className="mt-4 grid grid-cols-2 gap-y-4">
-
-                <PreviewItem
-                  label="INDUSTRY"
-                  value={selectedIndustry || "—"}
-                />
-
-                <PreviewItem
-                  label="TONE"
-                  value="Superblock for business"
-                />
-
-                <PreviewItem
-                  label="CONTACTS CALLED"
-                  value="Contacts"
-                />
-
-                <PreviewItem
-                  label="AUDIENCE AS"
-                  value="Audience"
-                />
-
-                <PreviewItem
-                  label="USE CASES"
-                  value="—"
-                />
-
-                <PreviewItem
-                  label="TEAM"
-                  value="—"
-                />
-
-              </div>
-
-              {/* Closest match preview */}
-
-              {closestMatch && (
-                <div className="mt-4">
-
-                  <PreviewItem
-                    label="CLOSEST MATCH"
-                    value={closestMatch}
-                  />
-
-                </div>
-              )}
-
-              {/* Footer note */}
-
-              <p className="mt-5 text-[11px] text-[#99958F]">
-                Everything is editable in{" "}
-                <span className="font-semibold text-[#55514B]">
-                  Settings → Preferences
-                </span>{" "}
-                any time.
-              </p>
-
             </div>
 
-          </aside>
+            {/* Preview Specs Grid */}
+            <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5">
+              <PreviewSpec label="INDUSTRY" value={currentObj.title} />
+              <PreviewSpec
+                label="TONE"
+                value={`Superblock for ${currentObj.id}`}
+              />
+              <PreviewSpec label="CONTACTS CALLED" value="Contacts" />
+              <PreviewSpec label="AUDIENCE AS" value="Audience" />
+              <PreviewSpec label="USE CASES" value="—" />
+              <PreviewSpec label="TEAM" value="—" />
+              {closestMatch && (
+                <PreviewSpec label="CLOSEST MATCH" value={closestMatch} />
+              )}
+            </dl>
 
-        </div>
-
+            {/* Footnote */}
+            <p className="mt-3 text-[10.5px] leading-[1.5] text-[#8E8B85]">
+              Everything is editable in{" "}
+              <span className="font-medium text-[#525252]">
+                Settings → Preferences
+              </span>{" "}
+              any time.
+            </p>
+          </div>
+        </aside>
       </main>
-    </>
+    </div>
   );
 }
 
-/* ============================================================
-   PREVIEW ITEM
-============================================================ */
-
-function PreviewItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function PreviewSpec({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-
-      <p className="text-[10px] font-medium tracking-[0.7px] text-[#99958F]">
+    <div className="min-w-0">
+      <dt className="text-[9.5px] font-medium uppercase tracking-[0.06em] text-[#8E8B85]">
         {label}
-      </p>
-
-      <p className="mt-1 text-[13px] font-medium text-[#202020]">
+      </dt>
+      <dd className="mt-0.5 truncate text-[11.5px] font-medium text-[#111111]">
         {value}
-      </p>
-
+      </dd>
     </div>
   );
 }
