@@ -448,7 +448,7 @@ export default function OnboardingPage() {
 
               <OnboardingNavigation
                 currentStep={1}
-                nextPath="/use-cases"
+                nextPath="/usecases"
                 backPath="/signup"
                 onContinue={() => {
                   localStorage.setItem(

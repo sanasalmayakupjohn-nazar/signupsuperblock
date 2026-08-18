@@ -456,7 +456,7 @@ export default function OnboardingPage() {
 
                 <OnboardingNavigation
                   currentStep={2}
-                  nextPath="/onboarding/scale"
+                  nextPath="/scale"
                   backPath="/onboarding"
                   onContinue={() => {
                     localStorage.setItem(
