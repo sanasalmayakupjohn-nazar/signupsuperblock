@@ -1,6 +1,6 @@
 "use client";
 
-import { useOnboarding } from "@/app/onboardingContext/page";
+import { useOnboarding } from "@/app/components/onboardingContext/page";
 
 export default function ActivationPage() {
   const { data } = useOnboarding();

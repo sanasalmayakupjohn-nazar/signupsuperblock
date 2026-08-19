@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import OnboardingHeader from "@/components/OnboardingHeader";
 import OnboardingNavigation from "@/components/OnboardingNavigation";
-import { useOnboarding } from "@/app/onboardingContext/page";
+import { useOnboarding } from "@/app/components/onboardingContext/page";
 
 import {
   FaBuilding,
@@ -358,14 +358,107 @@ export default function ContextPage() {
               {/* =================================================
                   BOTTOM NAVIGATION
               ================================================= */}
-
               <OnboardingNavigation
-                currentStep={5}
-                nextPath="/activation"
-                backPath="/discovery"
-                continueText="Open my workspace"
-                onContinue={handleContinue}
-              />
+  currentStep={5}
+  nextPath="/activation"
+  backPath="/discovery"
+  continueText="Open my workspace"
+  onContinue={async () => {
+    try {
+      // Save the latest context notes
+      setContext({
+        notes,
+      });
+
+      // Complete onboarding data
+      // PASSWORD IS NOT INCLUDED
+      const signupData = {
+        full_name: data.signup.full_name,
+        email: data.signup.email,
+      };
+
+      const businessData = {
+        business_name: data.business.business_name,
+        phone: data.business.phone,
+        country_code: data.business.country_code,
+        industry: data.business.industry,
+        website: data.business.website,
+        location: data.business.location,
+      };
+
+      const onboardingData = {
+        industry: data.industry,
+        closest_match: data.closest_match,
+
+        use_cases: data.use_cases.slice(0, 5),
+
+        scale: {
+          team_size: data.scale.team_size,
+          role: data.scale.role,
+          message_volume: data.scale.message_volume,
+          objectives: data.scale.objectives,
+        },
+
+        discovery: {
+          discovery: data.discovery.discovery,
+          details: data.discovery.details,
+        },
+
+        context: {
+          notes,
+        },
+      };
+
+      // Final payload
+      const payload = {
+        signup: signupData,
+        business: businessData,
+        onboarding: onboardingData,
+      };
+
+      console.log("Signup payload:", payload);
+
+      // Send everything to your existing signup endpoint
+      const response = await fetch(
+        "https://api.superblock.chat/signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error("Signup failed:", result);
+
+        alert(
+          result.message ||
+            result.error ||
+            "Failed to create account"
+        );
+
+        return;
+      }
+
+      console.log("Signup successful:", result);
+
+      // Move to activation/workspace
+      window.location.href = "/activation";
+
+    } catch (error) {
+      console.error("Signup request failed:", error);
+
+      alert(
+        "Unable to connect to the signup server."
+      );
+    }
+  }}
+/>
+              
 
             </div>
 
