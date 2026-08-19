@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useOnboarding } from "../../onboardingContext/page";
 
 import {
   FaWhatsapp,
@@ -28,6 +29,7 @@ export default function BusinessPage() {
   const [industry, setIndustry] = useState("");
   const [website, setWebsite] = useState("");
   const [location, setLocation] = useState("");
+  const { setBusiness } = useOnboarding();
 
   const [errors, setErrors] = useState({
     companyName: "",
@@ -69,26 +71,17 @@ export default function BusinessPage() {
       return;
     }
 
-    /*
-     * Save business information.
-     */
-    localStorage.setItem(
-      "business_info",
-      JSON.stringify({
-        companyName: companyName.trim(),
-        phone: phone.trim(),
-        countryCode,
-        industry,
-        website: website.trim(),
-        location: location.trim(),
-      })
-    );
+  setBusiness({
+    business_name: companyName.trim(),
+    phone: phone.trim(),
+    country_code: countryCode,
+    industry: industry,
+    website: website.trim(),
+    location: location.trim(),
+  });
 
-    /*
-     * Continue to onboarding step 1.
-     */
-    router.push("/onboardingentry");
-  };
+  router.push("/onboardingentry");
+};
 
   return (
     <main className="min-h-screen w-full bg-[#FAFAF8] text-[#0A0A0A]">

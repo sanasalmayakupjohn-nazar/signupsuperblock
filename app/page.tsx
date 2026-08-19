@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useOnboarding } from "./onboardingContext/page";
 
 import {
   FaWhatsapp,
@@ -28,6 +29,7 @@ export default function Home() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { setSignup } = useOnboarding();
 
   const [loading, setLoading] = useState(false);
 
@@ -123,40 +125,11 @@ export default function Home() {
     setLoading(true);
 
     try {
-      /* ========================================================
-         SAVE SIGNUP PROFILE LOCALLY (WITHOUT RAW PASSWORD)
-      ======================================================== */
-
-      const signupUser = {
+      setSignup({
         full_name: fullName.trim(),
         email: email.trim(),
-      };
-
-      localStorage.setItem("signup_user", JSON.stringify(signupUser));
-
-      /* ========================================================
-         OPTIONAL: SEND DATA TO N8N
-      ======================================================== */
-
-      const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
-
-      if (webhookUrl) {
-        try {
-          await fetch(webhookUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              full_name: fullName.trim(),
-              email: email.trim(),
-            }),
-          });
-        } catch (n8nError) {
-          console.error("n8n webhook error:", n8nError);
-        }
-      }
-
+        password: password,
+      });
       /* ========================================================
          GO TO BUSINESS PAGE
       ======================================================== */

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import OnboardingHeader from "@/components/OnboardingHeader";
 import OnboardingNavigation from "@/components/OnboardingNavigation";
+import { useOnboarding } from "@/app/onboardingContext/page";
 
 import {
   FaBuilding,
@@ -50,98 +51,142 @@ const steps = [
 ];
 
 /* ============================================================
-   DISCOVERY OPTIONS WITH EXACT LABELS & HINTS
+   DISCOVERY OPTIONS
 ============================================================ */
 
 const options = [
-  { id: "google_search", label: "Google search" },
-  { id: "social_media", label: "Social media" },
-  { id: "linkedin", label: "LinkedIn" },
-  { id: "twitter", label: "X / Twitter" },
-  { id: "youtube", label: "YouTube" },
-  { id: "friend", label: "Friend or colleague", hint: "Who recommended us?" },
-  { id: "agency", label: "Agency or consultant" },
-  { id: "event", label: "Event or conference", hint: "Which event?" },
-  { id: "ad", label: "Online ad" },
-  { id: "newsletter", label: "Newsletter" },
-  { id: "podcast", label: "Podcast" },
-  { id: "blog", label: "Blog or article" },
-  { id: "other", label: "Somewhere else", hint: "Tell us where" },
+  {
+    id: "google_search",
+    label: "Google search",
+  },
+  {
+    id: "social_media",
+    label: "Social media",
+  },
+  {
+    id: "linkedin",
+    label: "LinkedIn",
+  },
+  {
+    id: "twitter",
+    label: "X / Twitter",
+  },
+  {
+    id: "youtube",
+    label: "YouTube",
+  },
+  {
+    id: "friend",
+    label: "Friend or colleague",
+    hint: "Who recommended us?",
+  },
+  {
+    id: "agency",
+    label: "Agency or consultant",
+  },
+  {
+    id: "event",
+    label: "Event or conference",
+    hint: "Which event?",
+  },
+  {
+    id: "ad",
+    label: "Online ad",
+  },
+  {
+    id: "newsletter",
+    label: "Newsletter",
+  },
+  {
+    id: "podcast",
+    label: "Podcast",
+  },
+  {
+    id: "blog",
+    label: "Blog or article",
+  },
+  {
+    id: "other",
+    label: "Somewhere else",
+    hint: "Tell us where",
+  },
 ];
 
+/* ============================================================
+   PAGE
+============================================================ */
+
 export default function DiscoveryPage() {
-  const [selected, setSelected] = useState("google_search");
-  const [discoveryDetails, setDiscoveryDetails] = useState("");
-  const [userName, setUserName] = useState("");
-  const [industryTitle, setIndustryTitle] = useState("Ecommerce & D2C");
-  const [useCaseCount, setUseCaseCount] = useState(5);
+  const { data, setDiscovery } = useOnboarding();
 
-  /* ============================================================
-     LOAD USER NAME + SAVED DISCOVERY & PREVIEWS
-  ============================================================ */
+  /* ==========================================================
+     CONTEXT DATA
+  ========================================================== */
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem("signup_user");
-    if (savedUser) {
-      try {
-        const user = JSON.parse(savedUser);
-        if (user?.full_name) {
-          setUserName(user.full_name);
-        }
-      } catch (error) {
-        console.error("Failed to read signup user:", error);
-      }
-    }
+  const userName = data.signup.full_name;
 
-    const savedIndustry = localStorage.getItem("onboarding_industry");
-    if (savedIndustry) {
-      try {
-        const indData = JSON.parse(savedIndustry);
-        if (indData.title) setIndustryTitle(indData.title);
-        else if (indData.industry) setIndustryTitle(indData.industry);
-      } catch (error) {
-        console.error("Failed to read industry data:", error);
-      }
-    }
+  const industryTitle =
+    data.industry ||
+    data.business.industry ||
+    "Ecommerce & D2C";
 
-    const savedUseCases = localStorage.getItem("onboarding_use_cases");
-    if (savedUseCases) {
-      try {
-        const ucData = JSON.parse(savedUseCases);
-        if (Array.isArray(ucData.use_cases)) {
-          setUseCaseCount(ucData.use_cases.length);
-        }
-      } catch (error) {
-        console.error("Failed to read use cases data:", error);
-      }
-    }
+  const useCaseCount = data.use_cases.length;
 
-    const savedDiscovery = localStorage.getItem("onboarding_discovery");
-    if (savedDiscovery) {
-      try {
-        const discovery = JSON.parse(savedDiscovery);
-        if (discovery?.discovery) setSelected(discovery.discovery);
-        if (discovery?.details) setDiscoveryDetails(discovery.details);
-      } catch (error) {
-        console.error("Failed to read discovery data:", error);
-      }
-    }
-  }, []);
+  /* ==========================================================
+     DISCOVERY STATE
+  ========================================================== */
+
+  const [selected, setSelected] = useState(
+    data.discovery.discovery || "google_search"
+  );
+
+  const [discoveryDetails, setDiscoveryDetails] = useState(
+    data.discovery.details || ""
+  );
 
   const selectedOpt = options.find(
-    (o) => o.id === selected || o.label === selected
+    (option) =>
+      option.id === selected ||
+      option.label === selected
   );
+
+  /* ==========================================================
+     UPDATE DISCOVERY IN CONTEXT
+  ========================================================== */
+
+  const updateDiscovery = (
+    discovery: string,
+    details: string
+  ) => {
+    setSelected(discovery);
+    setDiscoveryDetails(details);
+
+    setDiscovery({
+      discovery,
+      details,
+    });
+  };
+
+  /* ============================================================
+     RENDER
+  ============================================================ */
 
   return (
     <div className="relative min-h-dvh overflow-hidden bg-[#FAFAF8] text-[#111111]">
       <OnboardingHeader />
 
-      {/* Background glow */}
+      {/* ======================================================
+          BACKGROUND GLOW
+      ====================================================== */}
+
       <div
         aria-hidden
         className="pointer-events-none absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full opacity-[0.18] blur-3xl transition-colors duration-[600ms]"
-        style={{ backgroundColor: "#064E3B" }}
+        style={{
+          backgroundColor: "#064E3B",
+        }}
       />
+
       <div
         aria-hidden
         className="pointer-events-none absolute -bottom-44 -left-32 h-[420px] w-[420px] rounded-full opacity-[0.10] blur-3xl"
@@ -161,16 +206,20 @@ export default function DiscoveryPage() {
         </p>
 
         <h1 className="max-w-[720px] text-[28px] font-semibold leading-[1.05] tracking-[-0.028em] text-[#111111] sm:text-[32px]">
-          {userName ? `Hey ${userName}, ` : "Hey there, "}
+          {userName
+            ? `Hey ${userName}, `
+            : "Hey there, "}
+
           <span className="font-medium text-[#525252]">
             let's shape your workspace.
           </span>
         </h1>
 
         <p className="mt-2.5 max-w-[640px] text-[13.5px] leading-[1.55] text-[#525252]">
-          Five quick questions — about a minute. We'll use them to pick channel
-          defaults, suggest templates, and tune the copy across the app so it
-          speaks your business's language from day one.
+          Five quick questions — about a minute. We'll use them
+          to pick channel defaults, suggest templates, and tune
+          the copy across the app so it speaks your business's
+          language from day one.
         </p>
       </section>
 
@@ -179,12 +228,16 @@ export default function DiscoveryPage() {
       ====================================================== */}
 
       <main className="relative mx-auto grid grid-cols-1 gap-6 px-5 pb-12 sm:px-8 lg:grid-cols-[180px_minmax(0,1fr)_340px]">
+
         {/* ====================================================
             LEFT — STEPS NAV
         ==================================================== */}
 
         <aside className="hidden lg:block">
-          <nav aria-label="Onboarding steps" className="sticky top-6">
+          <nav
+            aria-label="Onboarding steps"
+            className="sticky top-6"
+          >
             <ul className="flex flex-col gap-1.5">
               {steps.map((step, index) => {
                 const active = step.id === 4;
@@ -202,6 +255,7 @@ export default function DiscoveryPage() {
                       }`}
                     >
                       {/* Circle Icon */}
+
                       <span
                         className={`relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] transition-all duration-[200ms] ${
                           completed
@@ -215,14 +269,18 @@ export default function DiscoveryPage() {
                       </span>
 
                       {/* Text */}
+
                       <div className="min-w-0">
                         <p
                           className={`text-[12px] font-semibold leading-tight ${
-                            active ? "text-[#111111]" : "text-[#525252]"
+                            active
+                              ? "text-[#111111]"
+                              : "text-[#525252]"
                           }`}
                         >
                           {step.title}
                         </p>
+
                         <p className="mt-0.5 text-[10.5px] leading-tight text-[#8E8B85]">
                           {step.subtitle}
                         </p>
@@ -230,6 +288,7 @@ export default function DiscoveryPage() {
                     </div>
 
                     {/* Connector Line */}
+
                     {index < steps.length - 1 && (
                       <div
                         aria-hidden
@@ -249,7 +308,9 @@ export default function DiscoveryPage() {
 
         <section className="min-w-0">
           <div className="relative flex flex-col justify-between overflow-hidden rounded-[16px] border border-[#E8E5DF] bg-white shadow-sm">
+
             {/* Top Accent Line */}
+
             <div
               aria-hidden
               className="h-[3px] w-full"
@@ -260,7 +321,9 @@ export default function DiscoveryPage() {
             />
 
             <div className="p-6 sm:p-8 lg:p-9">
+
               {/* Step Header */}
+
               <div className="mb-6">
                 <p className="mb-1.5 text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#8E8B85]">
                   STEP 4 OF 5
@@ -271,8 +334,9 @@ export default function DiscoveryPage() {
                 </h2>
 
                 <p className="mt-1.5 max-w-[560px] text-[13.5px] leading-[1.5] text-[#525252]">
-                  Optional, but it helps us build more of what brought you here —
-                  your answers go to our growth team, never your inbox.
+                  Optional, but it helps us build more of what
+                  brought you here — your answers go to our growth
+                  team, never your inbox.
                 </p>
               </div>
 
@@ -283,13 +347,19 @@ export default function DiscoveryPage() {
               <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
                 {options.map((option) => {
                   const isSelected =
-                    selected === option.id || selected === option.label;
+                    selected === option.id ||
+                    selected === option.label;
 
                   return (
                     <button
                       key={option.id}
                       type="button"
-                      onClick={() => setSelected(option.id)}
+                      onClick={() => {
+                        updateDiscovery(
+                          option.id,
+                          discoveryDetails
+                        );
+                      }}
                       className={`rounded-[8px] border px-3 py-2 text-left transition-colors duration-[140ms] ${
                         isSelected
                           ? "border-[#064E3B] bg-[#E8F5EE]"
@@ -298,7 +368,9 @@ export default function DiscoveryPage() {
                     >
                       <span
                         className={`text-[13px] font-medium ${
-                          isSelected ? "text-[#064E3B]" : "text-[#111111]"
+                          isSelected
+                            ? "text-[#064E3B]"
+                            : "text-[#111111]"
                         }`}
                       >
                         {option.label}
@@ -308,7 +380,10 @@ export default function DiscoveryPage() {
                 })}
               </div>
 
-              {/* Optional Hint Text Input */}
+              {/* =============================================
+                  OPTIONAL HINT INPUT
+              ============================================= */}
+
               {selectedOpt?.hint && (
                 <div className="mt-5">
                   <p className="mb-2.5 text-[11.5px] font-medium uppercase tracking-[0.08em] text-[#8E8B85]">
@@ -318,7 +393,16 @@ export default function DiscoveryPage() {
                   <input
                     type="text"
                     value={discoveryDetails}
-                    onChange={(e) => setDiscoveryDetails(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      setDiscoveryDetails(value);
+
+                      setDiscovery({
+                        discovery: selected,
+                        details: value,
+                      });
+                    }}
                     maxLength={240}
                     placeholder="Optional — adds nice context"
                     className="h-9 w-full rounded-[8px] border border-[#E8E5DF] bg-white px-3 text-[14px] outline-none transition-all duration-[180ms] placeholder:text-[#8E8B85] focus:border-[#064E3B] focus:ring-[3px] focus:ring-[#E8F5EE]"
@@ -326,19 +410,19 @@ export default function DiscoveryPage() {
                 </div>
               )}
 
-              {/* Bottom Navigation */}
+              {/* =============================================
+                  BOTTOM NAVIGATION
+              ============================================= */}
+
               <OnboardingNavigation
                 currentStep={4}
                 nextPath="/context"
                 backPath="/scale"
                 onContinue={() => {
-                  localStorage.setItem(
-                    "onboarding_discovery",
-                    JSON.stringify({
-                      discovery: selected,
-                      details: discoveryDetails,
-                    })
-                  );
+                  setDiscovery({
+                    discovery: selected,
+                    details: discoveryDetails,
+                  });
                 }}
               />
             </div>
@@ -346,12 +430,14 @@ export default function DiscoveryPage() {
         </section>
 
         {/* ====================================================
-            RIGHT — LIVE PREVIEW ASIDE
+            RIGHT — LIVE PREVIEW
         ==================================================== */}
 
         <aside className="w-full shrink-0 self-start lg:sticky lg:top-6 lg:w-[340px]">
           <div className="overflow-hidden rounded-[16px] border border-[#E8E5DF] bg-white p-4 shadow-sm">
+
             {/* Header Row */}
+
             <div className="mb-1 flex items-center justify-between">
               <p className="text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#8E8B85]">
                 LIVE PREVIEW
@@ -364,14 +450,17 @@ export default function DiscoveryPage() {
             </div>
 
             <p className="mb-3 text-[11px] leading-[1.45] text-[#8E8B85]">
-              Your workspace stays calm and neutral — these colours are only
-              onboarding guideposts. Your preferences can always be changed
-              later.
+              Your workspace stays calm and neutral — these
+              colours are only onboarding guideposts. Your
+              preferences can always be changed later.
             </p>
 
             {/* Mini Dashboard Window */}
+
             <div className="overflow-hidden rounded-[8px] border border-[#E8E5DF] bg-[#FAFAF8]">
+
               {/* Browser Bar */}
+
               <div className="flex h-7 items-center justify-between border-b border-[#E8E5DF] bg-white px-2">
                 <div className="flex items-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#FF5F57]" />
@@ -387,41 +476,61 @@ export default function DiscoveryPage() {
               </div>
 
               {/* Dashboard Preview Body */}
+
               <div className="flex">
+
                 {/* Sidebar */}
+
                 <div className="flex w-[88px] flex-col gap-[3px] border-r border-[#E8E5DF] bg-white px-1.5 py-2">
                   <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] bg-[#E8F5EE] px-1.5 text-[8.5px] font-semibold text-[#064E3B]">
-                    <span>⌂</span> Home
+                    <span>⌂</span>
+                    Home
                   </div>
+
                   <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
-                    <span>♢</span> Inbox
+                    <span>♢</span>
+                    Inbox
                   </div>
+
                   <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
-                    <span>◇</span> Send
+                    <span>◇</span>
+                    Send
                   </div>
+
                   <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
-                    <span>♙</span> Customers
+                    <span>♙</span>
+                    Customers
                   </div>
+
                   <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
-                    <span>⚒</span> Build
+                    <span>⚒</span>
+                    Build
                   </div>
+
                   <div className="flex h-[18px] items-center gap-1.5 rounded-[4px] px-1.5 text-[8.5px] font-medium text-[#8E8B85]">
-                    <span>◫</span> Insights
+                    <span>◫</span>
+                    Insights
                   </div>
                 </div>
 
                 {/* Content */}
+
                 <div className="min-w-0 flex-1 space-y-2 p-2.5">
+
                   <div>
                     <p className="truncate text-[10.5px] font-semibold leading-tight text-[#111111]">
-                      {userName ? `Welcome back, ${userName}` : "Welcome back"}
+                      {userName
+                        ? `Welcome back, ${userName}`
+                        : "Welcome back"}
                     </p>
+
                     <p className="mt-0.5 truncate text-[9px] text-[#8E8B85]">
                       Superblock for {industryTitle.toLowerCase()}
                     </p>
                   </div>
 
                   {/* Stat Card */}
+
                   <div className="rounded-[6px] border border-[#E8E5DF] bg-white p-2">
                     <p className="text-[8px] font-medium uppercase tracking-[0.06em] text-[#8E8B85]">
                       CUSTOMERS REACHED THIS WEEK
@@ -431,34 +540,45 @@ export default function DiscoveryPage() {
                       <span className="text-[14px] font-semibold tabular-nums text-[#111111]">
                         1,284
                       </span>
+
                       <span className="rounded-[3px] bg-[#E8F5EE] px-1 text-[8.5px] font-medium text-[#064E3B]">
                         +12%
                       </span>
                     </div>
 
                     {/* Chart Bars */}
+
                     <div className="mt-2 flex h-[18px] items-end gap-px">
-                      {[5, 9, 6, 11, 8, 12, 14, 10, 13, 15].map((h, i) => (
-                        <span
-                          key={i}
-                          className={`flex-1 rounded-[2px] ${
-                            i === 9 ? "bg-[#064E3B]" : "bg-[#8E8B85]/30"
-                          }`}
-                          style={{ height: `${(h / 15) * 100}%` }}
-                        />
-                      ))}
+                      {[5, 9, 6, 11, 8, 12, 14, 10, 13, 15].map(
+                        (h, i) => (
+                          <span
+                            key={i}
+                            className={`flex-1 rounded-[2px] ${
+                              i === 9
+                                ? "bg-[#064E3B]"
+                                : "bg-[#8E8B85]/30"
+                            }`}
+                            style={{
+                              height: `${(h / 15) * 100}%`,
+                            }}
+                          />
+                        )
+                      )}
                     </div>
                   </div>
 
                   {/* Suggested Card */}
+
                   <div className="flex items-center gap-2 rounded-[6px] border border-[#064E3B]/15 bg-[#E8F5EE] p-2">
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[4px] bg-[#064E3B] text-[10px] text-white">
                       ✦
                     </span>
+
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[9.5px] font-semibold leading-tight text-[#111111]">
                         Suggested: Abandoned-cart reco...
                       </p>
+
                       <p className="mt-0.5 truncate text-[8.5px] text-[#8E8B85]">
                         Tap to scaffold a flow for contacts.
                       </p>
@@ -468,20 +588,44 @@ export default function DiscoveryPage() {
               </div>
             </div>
 
-            {/* Preview Specs Grid */}
+            {/* =================================================
+                PREVIEW SPECS
+            ================================================= */}
+
             <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5">
-              <PreviewSpec label="INDUSTRY" value={industryTitle} />
+              <PreviewSpec
+                label="INDUSTRY"
+                value={industryTitle}
+              />
+
               <PreviewSpec
                 label="TONE"
                 value={`Superblock for ${industryTitle.toLowerCase()}`}
               />
-              <PreviewSpec label="CONTACTS CALLED" value="Customers" />
-              <PreviewSpec label="AUDIENCE AS" value="Customers" />
-              <PreviewSpec label="USE CASES" value={`${useCaseCount} picked`} />
-              <PreviewSpec label="DISCOVERY" value={selectedOpt?.label || "—"} />
+
+              <PreviewSpec
+                label="CONTACTS CALLED"
+                value="Customers"
+              />
+
+              <PreviewSpec
+                label="AUDIENCE AS"
+                value="Customers"
+              />
+
+              <PreviewSpec
+                label="USE CASES"
+                value={`${useCaseCount} picked`}
+              />
+
+              <PreviewSpec
+                label="DISCOVERY"
+                value={selectedOpt?.label || "—"}
+              />
             </dl>
 
             {/* Footnote */}
+
             <p className="mt-3 text-[10.5px] leading-[1.5] text-[#8E8B85]">
               Everything is editable in{" "}
               <span className="font-medium text-[#525252]">
@@ -496,12 +640,23 @@ export default function DiscoveryPage() {
   );
 }
 
-function PreviewSpec({ label, value }: { label: string; value: string }) {
+/* ============================================================
+   PREVIEW SPEC
+============================================================ */
+
+function PreviewSpec({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
     <div className="min-w-0">
       <dt className="text-[9.5px] font-medium uppercase tracking-[0.06em] text-[#8E8B85]">
         {label}
       </dt>
+
       <dd className="mt-0.5 truncate text-[11.5px] font-medium text-[#111111]">
         {value}
       </dd>

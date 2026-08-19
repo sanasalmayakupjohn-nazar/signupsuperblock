@@ -1,5 +1,6 @@
 
 import type { Metadata } from "next";
+import { OnboardingProvider } from "./onboardingContext/page";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body><OnboardingProvider>{children}</OnboardingProvider></body>
     </html>
   );
 }
