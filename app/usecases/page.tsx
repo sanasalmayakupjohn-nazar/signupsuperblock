@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import OnboardingHeader from "@/components/OnboardingHeader";
 import OnboardingNavigation from "@/components/OnboardingNavigation";
-import { useOnboarding } from "@/app/components/onboardingContext/page";
+import { useOnboarding } from "@/app/components/onboardingContext/OnboardingContext";
 
 import {
   FaBuilding,

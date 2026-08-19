@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-import { OnboardingProvider } from "./components/onboardingContext/page";
+import { OnboardingProvider } from "./components/onboardingContext/OnboardingContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
