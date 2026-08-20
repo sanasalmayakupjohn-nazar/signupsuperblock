@@ -13,9 +13,9 @@ import type { ReactNode } from "react";
 ============================================================ */
 
 type SignupData = {
+  username: string;
   full_name: string;
   email: string;
-  password: string;
 };
 
 type BusinessData = {
@@ -81,9 +81,10 @@ type OnboardingContextType = {
 
 const createInitialData = (): OnboardingData => ({
   signup: {
+    username: "",
     full_name: "",
     email: "",
-    password: "",
+    
   },
 
   business: {
