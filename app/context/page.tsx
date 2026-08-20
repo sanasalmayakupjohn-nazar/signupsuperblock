@@ -372,10 +372,11 @@ export default function ContextPage() {
 
       // Complete onboarding data
       // PASSWORD IS NOT INCLUDED
-      const signupData = {
-        full_name: data.signup.full_name,
-        email: data.signup.email,
-      };
+     const signupData = {
+  username: data.signup.username,
+  full_name: data.signup.full_name,
+  email: data.signup.email,
+};;
 
       const businessData = {
         business_name: data.business.business_name,
