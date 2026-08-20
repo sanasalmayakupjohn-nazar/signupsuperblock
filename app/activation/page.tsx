@@ -9,7 +9,7 @@ export default function ActivationPage() {
     signup: {
       full_name: data.signup.full_name,
       email: data.signup.email,
-      password: data.signup.password,
+      
     },
 
     business: {
